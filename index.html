@@ -156,7 +156,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
           <circle cx="19" cy="5" r="2.5" fill="var(--green)"/>
         </svg>
         <div>
-          <h1 class="ft font-bold" style="font-size:20px;line-height:1.1">טיול טאטרה</h1>
+          <h1 class="ft font-bold" id="site-title" style="font-size:20px;line-height:1.1;cursor:pointer;transition:font-size .4s ease,color .3s ease;">טיול טאטרה</h1>
           <p style="font-size:14px;color:var(--ink3)">9 ימים · סלובקיה ופולין</p>
         </div>
       </div>
@@ -184,6 +184,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
         <p style="font-size:14px;color:var(--ink3);margin:0 0 2px;font-weight:500;">היום הנוכחי</p>
         <h2 class="ft font-bold" style="font-size:32px;color:var(--ink);line-height:1.2;margin:0" id="home-title">יום 1 — נחיתה</h2>
         <p style="font-size:15px;color:var(--ink2);margin:4px 0 0" id="home-sub"></p>
+        <p style="font-size:15px;font-weight:600;color:var(--amber);margin:3px 0 0" id="home-date"></p>
       </div>
       <div style="text-align:left;flex-shrink:0">
         <p class="fm font-bold" style="font-size:32px;color:var(--amber);margin:0;line-height:1" id="home-daynum">01</p>
@@ -205,6 +206,25 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
     <!-- day chips strip -->
     <div style="overflow-x:auto;padding-bottom:4px;margin-top:16px;margin-left:-18px;margin-right:-18px;padding-left:18px;padding-right:18px;">
       <div id="day-strip" style="display:flex;gap:8px;width:max-content;padding-bottom:4px;"></div>
+    </div>
+  </div>
+
+  <!-- stats row: countdown + weeks + km -->
+  <div class="grid grid-cols-3 gap-3">
+    <div class="card-sm" style="text-align:center;">
+      <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">ימים לטיול</p>
+      <p class="ft font-bold" style="font-size:36px;color:var(--amber);margin:0;line-height:1" id="home-countdown">—</p>
+      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0" id="home-countdown-sub">עד 3.9.2026</p>
+    </div>
+    <div class="card-sm" style="text-align:center;">
+      <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">שבועות לטיול</p>
+      <p class="ft font-bold" style="font-size:36px;color:var(--blue);margin:0;line-height:1" id="home-countdown-weeks">—</p>
+      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0" id="home-countdown-weeks-sub">שבועות נותרים</p>
+    </div>
+    <div class="card-sm" style="text-align:center;">
+      <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">ק"מ הליכה</p>
+      <p class="ft font-bold" style="font-size:36px;color:var(--green);margin:0;line-height:1" id="home-total-km">—</p>
+      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0">סה"כ ברגל</p>
     </div>
   </div>
 
@@ -418,7 +438,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
 const D = {
 days:[
   {
-    n:1, heTitle:"נחיתה בקרקוב", enTitle:null, hike:null, bed:"Tatranská Lomnica",
+    n:1, date:"3.9 · יום שישי", heTitle:"נחיתה בקרקוב", enTitle:null, hike:null, bed:"Tatranská Lomnica",
     kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
     checks:[
       {id:"d1a",t:"נחיתה בשדה התעופה קרקוב ~14:00"},
@@ -433,8 +453,8 @@ days:[
     drive:"קרקוב → Tatranská Lomnica",driveTime:"~2.5 שעות (180 ק\"מ)"
   },
   {
-    n:2, heTitle:"גן עדן סלובקי — Suchá Belá", enTitle:"Suchá Belá Loop", hike:"Suchá Belá Loop", bed:"Tatranská Lomnica",
-    kmFoot:6,elevUp:480,elevDown:480,peakM:700,dur:"4–5 שעות",
+    n:2, date:"4.9 · יום שבת", heTitle:"גן עדן סלובקי — Suchá Belá", enTitle:"Suchá Belá Loop", hike:"Suchá Belá Loop", bed:"Tatranská Lomnica",
+    kmFoot:9.2,elevUp:480,elevDown:480,peakM:966,dur:"4–5 שעות",
     checks:[
       {id:"d2a",t:"חניה ב-Podlesok parking lot"},
       {id:"d2b",t:"להביא 14€ מזומן (6€ חניה + 4€ כניסה × 2)"}
@@ -444,8 +464,8 @@ days:[
     drive:"Tatranská Lomnica → Podlesok",driveTime:"~35 דקות (28 ק\"מ)"
   },
   {
-    n:3, heTitle:"גן עדן סלובקי — Piecky", enTitle:"Piecky Canyon", hike:"Piecky", bed:"Tatranská Lomnica",
-    kmFoot:8,elevUp:320,elevDown:320,peakM:650,dur:"5–6 שעות",
+    n:3, date:"5.9 · יום ראשון", heTitle:"גן עדן סלובקי — Piecky", enTitle:"Piecky Canyon", hike:"Piecky", bed:"Tatranská Lomnica",
+    kmFoot:11.5,elevUp:530,elevDown:530,peakM:1100,dur:"4–5 שעות",
     checks:[
       {id:"d3a",t:"חניה בחניון ליד תחילת המסלול"},
       {id:"d3b",t:"להביא 14€ מזומן (6€ חניה + 4€ כניסה × 2)"}
@@ -455,9 +475,9 @@ days:[
     drive:"Tatranská Lomnica → Piecky",driveTime:"~30 דקות"
   },
   {
-    n:4, heTitle:"פסגת Lomnický štít ולינה בבקתה", enTitle:"Lomnický štít → Zelené Pleso",
+    n:4, date:"6.9 · יום שני", heTitle:"פסגת Lomnický štít ולינה בבקתה", enTitle:"Lomnický štít → Zelené Pleso",
     hike:"Skalnaté Pleso → Lomnický štít → Tatranská magistrála → Zelené Pleso", bed:"Chata pri Zelenom plese",
-    kmFoot:14,elevUp:700,elevDown:400,peakM:2634,dur:"7–8 שעות",
+    kmFoot:5.4,elevUp:330,elevDown:500,peakM:2020,dur:"2–3 שעות",
     checks:[
       {id:"d4a",t:"צ'ק אאוט מהמלון"},
       {id:"d4b",t:"אריזת תיק ל-2 ימים"},
@@ -474,9 +494,9 @@ days:[
     drive:null, driveTime:null
   },
   {
-    n:5, heTitle:"מהבקתה עד Tatranská Javorina", enTitle:"Javorová dolina → Tatranská Javorina",
+    n:5, date:"7.9 · יום שלישי", heTitle:"מהבקתה עד Tatranská Javorina", enTitle:"Javorová dolina → Tatranská Javorina",
     hike:"Veľké Biele Pleso → Javorová dolina → Tatranská Javorina", bed:"Zakopane",
-    kmFoot:16,elevUp:300,elevDown:900,peakM:1600,dur:"6–7 שעות",
+    kmFoot:12.5,elevUp:320,elevDown:null,peakM:1770,dur:"4–5 שעות",
     checks:[
       {id:"d5a",t:"לשמור מספר מונית מראש: FH Taxi או Tatry Taxi"},
       {id:"d5b",t:"כשעה לפני הסיום — לתאם איסוף מ-Tatranská Javorina"},
@@ -489,9 +509,9 @@ days:[
     drive:"Tatranská Javorina → Zakopane",driveTime:"~50 דקות (45 ק\"מ, כולל מעבר גבול)"
   },
   {
-    n:6, heTitle:"Kasprowy Wierch ואגמי הטטרה", enTitle:"Kasprowy Wierch → Czarny Staw",
+    n:6, date:"8.9 · יום רביעי", heTitle:"Kasprowy Wierch ואגמי הטטרה", enTitle:"Kasprowy Wierch → Czarny Staw",
     hike:"Kuźnice → Kasprowy Wierch → Hala Gąsienicowa → Czarny Staw Gąsienicowy", bed:"Zakopane",
-    kmFoot:10,elevUp:500,elevDown:1100,peakM:1987,dur:"6 שעות",
+    kmFoot:10.4,elevUp:200,elevDown:1000,peakM:2000,dur:"4–5 שעות",
     checks:[
       {id:"d6a",t:"נסיעה לאזור Kuźnice"},
       {id:"d6b",t:"לוודא חניה ועלות ליד Kuźnice"},
@@ -503,9 +523,9 @@ days:[
     drive:"Zakopane → Kuźnice",driveTime:"~10 דקות (5 ק\"מ)"
   },
   {
-    n:7, heTitle:"Morskie Oko וחמשת האגמים הפולניים", enTitle:"Dolina Pięciu Stawów → Morskie Oko",
+    n:7, date:"9.9 · יום חמישי", heTitle:"Morskie Oko וחמשת האגמים הפולניים", enTitle:"Dolina Pięciu Stawów → Morskie Oko",
     hike:"Palenica Białczańska → Dolina Pięciu Stawów Polskich → Świstówka Roztocka → Morskie Oko", bed:"Zakopane",
-    kmFoot:19,elevUp:1100,elevDown:1100,peakM:1665,dur:"8–9 שעות",
+    kmFoot:20.3,elevUp:1100,elevDown:1100,peakM:1850,dur:"7–9 שעות",
     checks:[
       {id:"d7a",t:"להזמין חניה ב-Palenica Białczańska מראש!"},
       {id:"d7b",t:"חניה ב-Palenica Białczańska"},
@@ -519,7 +539,7 @@ days:[
     drive:"Zakopane → Palenica Białczańska",driveTime:"~25 דקות (20 ק\"מ)"
   },
   {
-    n:8, heTitle:"ספא Chochołowskie Termy וקרקוב", enTitle:"Chochołowskie Termy + Kraków",
+    n:8, date:"10.9 · יום שישי", heTitle:"ספא Chochołowskie Termy וקרקוב", enTitle:"Chochołowskie Termy + Kraków",
     hike:"יום מנוחה וספא", bed:"Hilton Garden Inn Krakow Airport",
     kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
     checks:[
@@ -534,7 +554,7 @@ days:[
     drive:"Zakopane → Termy → קרקוב",driveTime:"~20 דק׳ + ~2 שעות"
   },
   {
-    n:9, heTitle:"טיסה הביתה", enTitle:null, hike:null, bed:null,
+    n:9, date:"11.9 · יום שבת", heTitle:"טיסה הביתה", enTitle:null, hike:null, bed:null,
     kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
     checks:[
       {id:"d9a",t:"להיות בשדה התעופה בשעה 3:00 בלילה (טיסה ב-5:30)"},
@@ -563,7 +583,7 @@ packing:{
   "נעליים":["כפכפים","נעלי הליכה"],
   "טואלטיקה":["מגבת טיולים","מגבת קטנה","תיק כלי רחצה נתלה","שמפו","סבון","מרכך","עדשות + נוזל","דאודורנט","מברשת ומשחת שיניים","קרם הגנה","קרם פנים","קרם ידיים","שפתון","אלכוג'ל"],
   "ציוד וחירום":["מקלות הליכה","בקבוק מים","שלוקר","פנס ראש","שמיכת מילוט","ליינר","כיסוי לתיק גשם","אטמי אוזניים + כיסוי עיניים","עזרה ראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדי ליבלות, אדוויל, מיגרנה, קלבטן, אלרגיה)","סכין","מנעול","תיק טיסה","קליפס לאוכל","עט","שקיות לאוכל","נייר טואלט","שקית לטישו שטח"],
-  "מסמכים וכסף":["דרכון","רישיון נהיגה","אשראי","מזומן EUR","מזומן PLN (לפחות 300 zł)"],
+  "מסמכים וכסף":["דרכון","רישיון נהיגה","אשראי","מזומן EUR","מזומן PLN"],
   "אלקטרוניקה":["מטען","מטען נייד 10,000","אוזניות","כבלים","טלפון לוויני"],
   "אוכל לשביל":["מסטיקים","אגוזים","פירות יבשים","חטיפי אנרגיה","שוקולד"]
 },
@@ -659,7 +679,7 @@ function renderExps(){
   });
   const ceurEl=document.getElementById('exp-cash-eur');if(ceurEl)ceurEl.textContent=`${cashEUR.toFixed(0)}€`;
   const cplnEl=document.getElementById('exp-cash-pln');if(cplnEl)cplnEl.textContent=`${cashPLN.toFixed(0)} zł`;
-  document.getElementById('exp-cable').textContent=`≈${cableEUR.toFixed(0)}€`;
+  document.getElementById('exp-cable').textContent=`${cableEUR.toFixed(0)}€`;
   if(!expenses.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   list.innerHTML=`<table class="etbl"><thead><tr><th>תיאור</th><th style="text-align:left">סכום</th><th></th></tr></thead><tbody>
@@ -738,6 +758,40 @@ function renderHome(){
   document.getElementById('home-sub').textContent=day.enTitle||day.hike||'';
   document.getElementById('home-daynum').textContent=String(day.n).padStart(2,'0');
   document.getElementById('hdr-day').textContent=`יום ${day.n}/9`;
+  const dateEl=document.getElementById('home-date');
+  if(dateEl) dateEl.textContent=day.date||'';
+
+  // countdown days and weeks
+  const tripStart=new Date('2026-09-03T00:00:00');
+  const now=new Date();
+  const diffMs=tripStart-now;
+  const cdEl=document.getElementById('home-countdown');
+  const cdSub=document.getElementById('home-countdown-sub');
+  const cdWeeksEl=document.getElementById('home-countdown-weeks');
+  const cdWeeksSub=document.getElementById('home-countdown-weeks-sub');
+
+  if(diffMs>0){
+    const days=Math.ceil(diffMs/(1000*60*60*24));
+    const weeks=(days/7).toFixed(1);
+    cdEl.textContent=days;
+    cdSub.textContent=days===1?'יום אחד נשאר!':'ימים עד הטיול';
+    cdWeeksEl.textContent=weeks;
+    cdWeeksSub.textContent='שבועות נותרים';
+  } else if(diffMs>-(9*24*60*60*1000)){
+    cdEl.textContent='🏔️';
+    cdSub.textContent='הטיול מתחיל עכשיו!';
+    cdWeeksEl.textContent='🏔️';
+    cdWeeksSub.textContent='במהלך הטיול';
+  } else {
+    cdEl.textContent='✓';
+    cdSub.textContent='הטיול הסתיים';
+    cdWeeksEl.textContent='✓';
+    cdWeeksSub.textContent='הסתיים';
+  }
+
+  // סה"כ ק"מ
+  const totalKm=D.days.reduce((s,d)=>s+(d.kmFoot||0),0);
+  document.getElementById('home-total-km').textContent=totalKm.toFixed(1);
 
   const linaWrap=document.getElementById('home-lina');
   if(day.bed){
@@ -795,6 +849,7 @@ function renderItinerary(){
           <div style="min-width:0;">
             <h3 class="ft font-bold" style="font-size:18px;color:var(--ink);margin:0;" data-editable>${day.heTitle}</h3>
             ${day.enTitle?`<p style="font-size:15px;color:var(--ink2);margin:3px 0 0;font-weight:500;" data-editable>${day.enTitle}</p>`:''}
+            ${day.date?`<p style="font-size:14px;color:var(--ink2);margin:4px 0 0;font-weight:600;">${day.date}</p>`:''}
             ${day.bed?`<div style="display:flex;align-items:center;gap:5px;margin-top:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 22V8L12 2L21 8V22H15V16H9V22H3Z" stroke="var(--amber)" stroke-width="1.8" stroke-linejoin="round"/></svg><span style="font-size:14px;font-weight:700;color:var(--ink);" data-editable>${day.bed}</span></div>`:''}
           </div>
         </div>
@@ -999,6 +1054,136 @@ function init(){
   setTab('home');
 }
 init();
+</script>
+<!-- BIRTHDAY MODAL -->
+<div id="bday-modal" style="display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;">
+  <div id="bday-backdrop" style="position:absolute;inset:0;background:rgba(30,20,10,.55);backdrop-filter:blur(4px);" onclick="closeBday()"></div>
+  <div style="position:relative;z-index:1;background:var(--surf);border-radius:24px;padding:36px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.18);">
+    <button onclick="closeBday()" style="position:absolute;top:14px;left:16px;background:var(--surf2);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+    <div style="font-size:52px;margin-bottom:12px;">🎂</div>
+    <p style="font-size:14px;color:var(--ink3);margin:0 0 6px;font-weight:500;letter-spacing:.06em;">✨ טיול יום הולדת</p>
+    <h2 class="ft font-bold" style="font-size:36px;color:var(--amber);margin:0 0 8px;line-height:1.1;">יום הולדת 30!</h2>
+    <p style="font-size:16px;color:var(--ink2);margin:0 0 20px;line-height:1.6;">הרי הטאטרה מחכים 🏔️<br>סלובקיה ופולין · ספטמבר 2026</p>
+    <button onclick="closeBday()" style="background:var(--amber);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-family:'Assistant',sans-serif;font-size:16px;font-weight:700;cursor:pointer;">יאללה לטייל! 🎉</button>
+  </div>
+  <canvas id="confetti-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:101;"></canvas>
+</div>
+
+<script>
+/* ============================================================
+   BIRTHDAY MODAL + CONFETTI
+============================================================ */
+const BDAY_KEY = 'tatra_bday_seen';
+let bdayOpened = false;
+
+function openBday(){
+  bdayOpened = true;
+  sessionStorage.setItem(BDAY_KEY, '1');
+  stopTitlePulse();
+  const modal = document.getElementById('bday-modal');
+  modal.style.display = 'flex';
+  startConfetti();
+}
+
+function closeBday(){
+  document.getElementById('bday-modal').style.display = 'none';
+  stopConfetti();
+}
+
+document.getElementById('site-title').addEventListener('click', openBday);
+
+/* ---- title pulse animation ---- */
+let pulseInterval = null;
+let pulseOn = false;
+
+function doPulse(){
+  if(sessionStorage.getItem(BDAY_KEY)){ stopTitlePulse(); return; }
+  const el = document.getElementById('site-title');
+  if(!el) return;
+  el.style.transition = 'font-size .3s cubic-bezier(.34,1.56,.64,1), color .3s ease';
+  el.style.fontSize = '28px';
+  el.style.color = '#C97B3C';
+  setTimeout(()=>{
+    el.style.fontSize = '20px';
+    el.style.color = 'var(--ink)';
+  }, 700);
+}
+
+function startTitlePulse(){
+  if(sessionStorage.getItem(BDAY_KEY)) return;
+  doPulse();
+  pulseInterval = setInterval(doPulse, 60000);
+}
+
+function stopTitlePulse(){
+  clearInterval(pulseInterval);
+  const el = document.getElementById('site-title');
+  if(el){ el.style.fontSize = '20px'; el.style.color = 'var(--ink)'; }
+}
+
+// מחיקת BDAY_KEY רק לצורך בדיקה — הסר שורה זו בגרסה הסופית
+// localStorage.removeItem(BDAY_KEY);
+
+setTimeout(() => { startTitlePulse(); }, 800);
+
+
+/* ---- confetti ---- */
+let confettiAnimId = null;
+const COLORS = ['#C97B3C','#E8A855','#7A8B6F','#3D6E8F','#D4A843','#E86B3C','#7FBF6F','#5B8FBF'];
+
+function startConfetti(){
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({length:140}, ()=>({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 7 + 4,
+    color: COLORS[Math.floor(Math.random()*COLORS.length)],
+    vx: (Math.random()-0.5)*3,
+    vy: Math.random()*3+2,
+    rot: Math.random()*360,
+    vrot: (Math.random()-0.5)*6,
+    shape: Math.random()>.5 ? 'rect' : 'circle',
+    w: Math.random()*10+5,
+    h: Math.random()*6+3,
+    opacity: Math.random()*.4+.6
+  }));
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle = p.color;
+      if(p.shape==='rect'){
+        ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0,0,p.r,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vrot;
+      if(p.y > canvas.height + 20) p.y = -20;
+    });
+    confettiAnimId = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function stopConfetti(){
+  if(confettiAnimId) cancelAnimationFrame(confettiAnimId);
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
 </script>
 </body>
 </html>
