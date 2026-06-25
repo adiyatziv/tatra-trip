@@ -209,17 +209,17 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
     </div>
   </div>
 
-  <!-- stats row: countdown + weeks + km -->
+  <!-- stats row: countdown + km -->
   <div class="grid grid-cols-3 gap-3">
+    <div class="card-sm" style="text-align:center;">
+      <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">שבועות לטיול</p>
+      <p class="ft font-bold" style="font-size:36px;color:var(--amber);margin:0;line-height:1" id="home-countdown-weeks">—</p>
+      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0">שבועות</p>
+    </div>
     <div class="card-sm" style="text-align:center;">
       <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">ימים לטיול</p>
       <p class="ft font-bold" style="font-size:36px;color:var(--amber);margin:0;line-height:1" id="home-countdown">—</p>
       <p style="font-size:12px;color:var(--ink3);margin:2px 0 0" id="home-countdown-sub">עד 3.9.2026</p>
-    </div>
-    <div class="card-sm" style="text-align:center;">
-      <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">שבועות לטיול</p>
-      <p class="ft font-bold" style="font-size:36px;color:var(--blue);margin:0;line-height:1" id="home-countdown-weeks">—</p>
-      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0" id="home-countdown-weeks-sub">שבועות נותרים</p>
     </div>
     <div class="card-sm" style="text-align:center;">
       <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">ק"מ הליכה</p>
@@ -349,6 +349,12 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
     </a>
     <a href="https://ubian.sk/" target="_blank" class="maplink" style="display:flex">
       <div><p style="font-size:15px;font-weight:500;margin:0">ubian.sk — לוחות זמנים סלובקיה</p><p style="font-size:12px;color:var(--ink3);margin:0">לחיבורי אוטובוס ביום 5</p></div><span style="color:var(--amber);margin-right:auto">↗</span>
+    </a>
+    <a href="https://www.omio.com" target="_blank" class="maplink" style="display:flex">
+      <div><p style="font-size:15px;font-weight:500;margin:0">Omio — תחבורה ציבורית</p><p style="font-size:12px;color:var(--ink3);margin:0">אפליקציה מומלצת לאוטובוסים ורכבות באירופה</p></div><span style="color:var(--amber);margin-right:auto">↗</span>
+    </a>
+    <a href="https://trails-tatra-mountains.en.softonic.com/android" target="_blank" class="maplink" style="display:flex">
+      <div><p style="font-size:15px;font-weight:500;margin:0">Trails Tatra Mountains — אפליקציית שבילים</p><p style="font-size:12px;color:var(--ink3);margin:0">לבדוק אם האפליקציה זמינה להורדה</p></div><span style="color:var(--amber);margin-right:auto">↗</span>
     </a>
     <a href="https://www.google.com/maps/d/viewer?mid=1WVsFveqJhkEW8OEJvpw3I1Lm8ttsgBY" target="_blank" class="maplink" style="display:flex">
       <div><p style="font-size:15px;font-weight:500;margin:0">מפת המסלולים — Google Maps</p><p style="font-size:12px;color:var(--ink3);margin:0">מפה מותאמת אישית של הטיול</p></div><span style="color:var(--amber);margin-right:auto">↗</span>
@@ -513,8 +519,9 @@ days:[
     hike:"Kuźnice → Kasprowy Wierch → Hala Gąsienicowa → Czarny Staw Gąsienicowy", bed:"Zakopane",
     kmFoot:10.4,elevUp:200,elevDown:1000,peakM:2000,dur:"4–5 שעות",
     checks:[
-      {id:"d6a",t:"נסיעה לאזור Kuźnice"},
-      {id:"d6b",t:"לוודא חניה ועלות ליד Kuźnice"},
+      {id:"d6a",t:"נסיעה לאזור Kuźnice — מומלץ לקחת מונית לשם (לא כדאי להביא רכב לאזור זה)"},
+      {id:"d6b",t:"לוודא עלות מונית ל-Kuźnice מראש"},
+      {id:"d6b2",t:"לוודא חניה ועלות ליד Kuźnice אם בכל זאת מגיעים ברכב"},
       {id:"d6c",t:"רכבל עד Kasprowy Wierch — 218 zł לשניים"},
       {id:"d6d",t:"כניסה לשמורה — 9 zł לאדם = 18 zł לשניים"}
     ],
@@ -576,7 +583,9 @@ preflight:[
   {id:"pf9",t:"להזמין חניה מראש ב-Palenica Białczańska (יום 7)"},
   {id:"pf10",t:"לשמור מספרי מוניות ל-Tatranská Javorina (יום 5)"},
   {id:"pf11",t:"פולין — דקטלון? הזמנה מיוניקלו?"},
-  {id:"pf12",t:"להזמין מגנוס / טלפון לוויני"}
+  {id:"pf12",t:"להזמין מגנוס / טלפון לוויני"},
+  {id:"pf13",t:"לברר כמה עולה מונית ל-Kuźnice (יום 6)"},
+  {id:"pf14",t:"לוודא שמעיל הגשם אטום ואיכותי לתנאי הרים"}
 ],
 packing:{
   "ביגוד":["כובע","משקפי שמש + חוט ביטחון","כפפות","כובע גרב","2 מכנסיים לטיולים","2 חולצות קצרות מנדפות","דרייפיט ארוכה","חולצה תרמית","פליז","עליונית נגד מים","עליונית פוך","מכנס טרנינג לערב ולשינה","תחתונים (כמה זוגות)","גרביים לטיולים","גרבי טאבי לערב"],
@@ -761,32 +770,28 @@ function renderHome(){
   const dateEl=document.getElementById('home-date');
   if(dateEl) dateEl.textContent=day.date||'';
 
-  // countdown days and weeks
+  // countdown
   const tripStart=new Date('2026-09-03T00:00:00');
   const now=new Date();
   const diffMs=tripStart-now;
   const cdEl=document.getElementById('home-countdown');
   const cdSub=document.getElementById('home-countdown-sub');
-  const cdWeeksEl=document.getElementById('home-countdown-weeks');
-  const cdWeeksSub=document.getElementById('home-countdown-weeks-sub');
-
   if(diffMs>0){
     const days=Math.ceil(diffMs/(1000*60*60*24));
-    const weeks=(days/7).toFixed(1);
     cdEl.textContent=days;
     cdSub.textContent=days===1?'יום אחד נשאר!':'ימים עד הטיול';
-    cdWeeksEl.textContent=weeks;
-    cdWeeksSub.textContent='שבועות נותרים';
   } else if(diffMs>-(9*24*60*60*1000)){
     cdEl.textContent='🏔️';
     cdSub.textContent='הטיול מתחיל עכשיו!';
-    cdWeeksEl.textContent='🏔️';
-    cdWeeksSub.textContent='במהלך הטיול';
   } else {
     cdEl.textContent='✓';
     cdSub.textContent='הטיול הסתיים';
-    cdWeeksEl.textContent='✓';
-    cdWeeksSub.textContent='הסתיים';
+  }
+
+  // שבועות
+  const weeksEl=document.getElementById('home-countdown-weeks');
+  if(weeksEl){
+    weeksEl.textContent = diffMs>0 ? Math.floor(diffMs/(1000*60*60*24*7)) : (diffMs>-(9*24*60*60*1000)?'🏔️':'✓');
   }
 
   // סה"כ ק"מ
@@ -1057,7 +1062,7 @@ init();
 </script>
 <!-- BIRTHDAY MODAL -->
 <div id="bday-modal" style="display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;">
-  <div id="bday-backdrop" style="position:absolute;inset:0;background:rgba(30,20,10,.55);backdrop-filter:blur(4px);" onclick="closeBday()"></div>
+  <div id="bday-backdrop" style="position:absolute;inset:0;background:#EDEAE0;opacity:0.92;" onclick="closeBday()"></div>
   <div style="position:relative;z-index:1;background:var(--surf);border-radius:24px;padding:36px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.18);">
     <button onclick="closeBday()" style="position:absolute;top:14px;left:16px;background:var(--surf2);border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
     <div style="font-size:52px;margin-bottom:12px;">🎂</div>
