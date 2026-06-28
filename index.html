@@ -716,7 +716,7 @@ body:not(.global-edit-active) .edit-indicator {
       "שמיכת מילוט","ליינר","כיסוי לתיק",
       "שאקלים + שאקלים לתליה",
       "ערכת תפירה וסיכות ביטחון",
-      "עזרה ראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדים ליבלות, משחה לכוויות, כדורים: אדוויל, מיגרנה, קלבטן, בחילות, אלרגיה, אזיקונים, חוט)",
+      "עזרהראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדים ליבלות, משחה לכוויות, כדורים: אדוויל, מיגרנה, קלבטן, בחילות, אלרגיה, אזיקונים, חוט)",
       "שקית לטישו שטח",
       "שקיות לאוכל בכמה גדלים (דרכון תמיד בפנים)",
       "נייר טואלט",
@@ -804,6 +804,7 @@ body:not(.global-edit-active) .edit-indicator {
   let curLock=false;
   function initCur(){
     const il=document.getElementById('c-ils'),eu=document.getElementById('c-eur'),pl=document.getElementById('c-pln');
+    if(!il || !eu || !pl) return;
     const fI=v=>{eu.value=(v/ILS_EUR).toFixed(2);pl.value=(v/ILS_EUR*PLN_EUR).toFixed(2);};
     const fE=v=>{il.value=(v*ILS_EUR).toFixed(2);pl.value=(v*PLN_EUR).toFixed(2);};
     const fP=v=>{eu.value=(v/PLN_EUR).toFixed(2);il.value=(v/PLN_EUR*ILS_EUR).toFixed(2);};
@@ -816,10 +817,7 @@ body:not(.global-edit-active) .edit-indicator {
       let preventDeselection = false;
       inp.addEventListener('focus', () => {
         preventDeselection = true;
-        setTimeout(() => {
-          inp.select();
-          try { inp.setSelectionRange(0, 9999); } catch(e) {}
-        }, 50);
+        setTimeout(() => { inp.select(); try { inp.setSelectionRange(0, 9999); } catch(e) {} }, 50);
       });
       inp.addEventListener('mousedown', () => { if (document.activeElement === inp) return; preventDeselection = true; });
       inp.addEventListener('mouseup', (e) => { if (preventDeselection) { e.preventDefault(); preventDeselection = false; } });
@@ -838,10 +836,12 @@ body:not(.global-edit-active) .edit-indicator {
   /* ============================================================
       EXPENSES TRACKING
   ============================================================ */
-  document.getElementById('add-exp-btn').addEventListener('click',()=>{
-    const f=document.getElementById('exp-form');
-    f.style.display=f.style.display==='none'?'block':'none';
-  });
+  if(document.getElementById('add-exp-btn')) {
+    document.getElementById('add-exp-btn').addEventListener('click',()=>{
+      const f=document.getElementById('exp-form');
+      f.style.display=f.style.display==='none'?'block':'none';
+    });
+  }
   function saveExp(){
     const desc=document.getElementById('exp-desc').value.trim();
     const amt=parseFloat(document.getElementById('exp-amount').value)||0;
@@ -870,8 +870,8 @@ body:not(.global-edit-active) .edit-indicator {
     const ceurEl=document.getElementById('exp-cash-eur');if(ceurEl)ceurEl.textContent=`${cashEUR.toFixed(0)}€`;
     const cplnEl=document.getElementById('exp-cash-pln');if(cplnEl)cplnEl.textContent=`${cashPLN.toFixed(0)} zł`;
     const ccblEl=document.getElementById('exp-cable');if(ccblEl)ccblEl.textContent=`${cableEUR.toFixed(0)}€`;
-    if(!expenses.length){list.innerHTML='';empty.style.display='block';return;}
-    empty.style.display='none';
+    if(!expenses.length){list.innerHTML='';if(empty)empty.style.display='block';return;}
+    if(empty)empty.style.display='none';
     list.innerHTML=`<table class="etbl"><thead><tr><th>תיאור</th><th style="text-align:left">סכום</th><th></th></tr></thead><tbody>
       ${expenses.map(e=>`<tr>
         <td><span style="font-size:14px">${e.desc}</span><br>
@@ -884,12 +884,25 @@ body:not(.global-edit-active) .edit-indicator {
   }
 
   /* ============================================================
-      UNIVERSAL DIRECT EDITABLE CHECKBOX COMPONENT
+      DRAG & DROP + CHECKBOX LIST ENGINE
   ============================================================ */
-  const TICK=`<svg class="tk" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  function makeRow(id, text, checked, stObj, onDel, onRename, onMoveUp, onMoveDown, isFirst, isLast) {
+  const TICK=`<svg class="tk" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linecap="round"/></svg>`;
+  const uid=p=>`${p}${Date.now()}${Math.floor(Math.random()*999)}`;
+
+  function makeRow(id, text, checked, stObj, onDel, onRename, index, listType, listContext) {
     const row = document.createElement('div');
-    row.className = 'flex items-start gap-3 py-2.5 border-b border-gray-200/60 group relative';
+    row.className = 'flex items-start gap-3 py-2.5 border-b border-gray-200/60 group relative touch-none';
+    
+    if (globalEditMode) {
+      row.setAttribute('draggable', 'true');
+      row.classList.add('cursor-grab', 'active:cursor-grabbing', 'hover:bg-amber-50/40');
+      
+      row.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ id, index, listType, listContext }));
+        row.style.opacity = '0.4';
+      });
+      row.addEventListener('dragend', () => row.style.opacity = '1');
+    }
 
     const box = document.createElement('button');
     box.className = 'chk' + (checked ? ' on' : '');
@@ -910,78 +923,90 @@ body:not(.global-edit-active) .edit-indicator {
     const actions = document.createElement('div');
     actions.className = 'edit-indicator items-center gap-1 absolute left-2 top-2 bg-white/90 pl-1 rounded hidden';
 
-    const upBtn = document.createElement('button');
-    upBtn.className = 'text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 disabled:opacity-20 font-bold text-xs';
-    upBtn.innerHTML = '↑';
-    upBtn.disabled = isFirst;
-    upBtn.onclick = (e) => { e.preventDefault(); onMoveUp(id); };
-
-    const downBtn = document.createElement('button');
-    downBtn.className = 'text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 disabled:opacity-20 font-bold text-xs';
-    downBtn.innerHTML = '↓';
-    downBtn.disabled = isLast;
-    downBtn.onclick = (e) => { e.preventDefault(); onMoveDown(id); };
-
     const editBtn = document.createElement('button');
     editBtn.className = 'text-amber-600 hover:text-amber-700 p-1 rounded hover:bg-amber-50';
-    editBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 20h9"></path>
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-      </svg>
-    `;
+    editBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
     editBtn.addEventListener('click', () => {
       const orig = lbl.textContent;
       lbl.setAttribute('contenteditable', 'true');
       lbl.focus();
-      const range = document.createRange();
-      range.selectNodeContents(lbl);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+      const range = document.createRange(); range.selectNodeContents(lbl);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
 
-      const doneEdit = () => {
+      lbl.addEventListener('blur', () => {
         lbl.removeAttribute('contenteditable');
         const val = lbl.textContent.trim();
         if (val && val !== orig) onRename(id, val);
         else lbl.textContent = orig;
-      };
-      lbl.addEventListener('blur', doneEdit, { once: true });
-      lbl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); lbl.blur(); } });
+      }, { once: true });
     });
 
     const delBtn = document.createElement('button');
-    delBtn.className = 'text-red-500 hover:text-red-600 p-1 rounded hover:bg-red-50 font-bold text-xs px-1.5';
+    delBtn.className = 'text-red-500 hover:text-red-600 p-1 font-bold text-xs px-1.5';
     delBtn.innerHTML = '✕';
     delBtn.addEventListener('click', () => { showConfirm('מחיקת פריט', `האם למחוק את "${text}"?`, () => onDel(id)); });
 
-    actions.appendChild(upBtn);
-    actions.appendChild(downBtn);
     actions.appendChild(editBtn);
     actions.appendChild(delBtn);
     row.appendChild(actions);
     return row;
   }
 
-  function renderList({ cont, items, onRename, onDel, onMoveUp, onMoveDown, stObj, addId, btnId, onAdd }) {
+  function handleListDrop(e, targetContainer, listType, listContext) {
+    e.preventDefault();
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+      if (data.listType !== listType || data.listContext !== listContext) return;
+      
+      let arr;
+      if (listType === 'itinerary') {
+        const day = db.days.find(d => `d${d.n}` === listContext);
+        arr = day.checks;
+      } else if (listType === 'preflight') {
+        arr = db.preflight;
+      } else if (listType === 'packing') {
+        arr = db.packing[listContext];
+      }
+      
+      const dragItem = arr.splice(data.index, 1)[0];
+      
+      const rows = [...targetContainer.querySelectorAll('[draggable]')];
+      const nextRow = rows.find(row => {
+        const box = row.getBoundingClientRect();
+        return e.clientY < box.top + box.height / 2;
+      });
+      
+      const nextIndex = nextRow ? rows.indexOf(nextRow) : arr.length;
+      arr.splice(nextIndex, 0, dragItem);
+      saveStateToFirebase();
+    } catch(err) {}
+  }
+
+  function renderList({ cont, items, onRename, onDel, stObj, addId, btnId, onAdd, listType, listContext }) {
     if(!cont) return;
     cont.innerHTML = '';
+    
+    if (globalEditMode) {
+      cont.addEventListener('dragover', (e) => e.preventDefault());
+      cont.addEventListener('drop', (e) => handleListDrop(e, cont, listType, listContext));
+    }
+
     items.forEach((item, i) => {
-      const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, onDel, onRename, onMoveUp, onMoveDown, i === 0, i === items.length - 1);
+      const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, onDel, onRename, i, listType, listContext);
       if (i === items.length - 1) row.style.borderBottom = 'none';
       cont.appendChild(row);
     });
-    if (addId) {
-      const inp = document.getElementById(addId), btn = document.getElementById(btnId);
-      if (inp && btn) {
-        btn.onclick = () => {
-          const t = inp.value.trim();
-          if (!t) return;
-          onAdd(t);
-          inp.value = '';
-        };
-        inp.onkeydown = e => { if (e.key === 'Enter') btn.click(); };
-      }
+
+    const inp = document.getElementById(addId), btn = document.getElementById(btnId);
+    if (inp && btn) {
+      btn.onclick = null;
+      btn.onclick = () => {
+        const t = inp.value.trim();
+        if (!t) return;
+        onAdd(t);
+        inp.value = '';
+      };
+      inp.onkeydown = e => { if (e.key === 'Enter') btn.click(); };
     }
   }
 
@@ -1020,7 +1045,9 @@ body:not(.global-edit-active) .edit-indicator {
     renderAllModules();
   }
 
-  document.getElementById('global-edit-btn').addEventListener('click', toggleGlobalEdit);
+  if(document.getElementById('global-edit-btn')) {
+    document.getElementById('global-edit-btn').addEventListener('click', toggleGlobalEdit);
+  }
 
   document.addEventListener('blur', (e) => {
     const f = e.target.getAttribute('data-editable-field');
@@ -1048,22 +1075,13 @@ body:not(.global-edit-active) .edit-indicator {
     if(!day) return;
     
     const titleEl = document.getElementById('home-title');
-    if(titleEl) {
-      titleEl.textContent = `יום ${day.n} — ${day.heTitle}`;
-      setEditable(titleEl, `days.${curDay-1}.heTitle`);
-    }
+    if(titleEl) { titleEl.textContent = `יום ${day.n} — ${day.heTitle}`; setEditable(titleEl, `days.${curDay-1}.heTitle`); }
 
     const subEl = document.getElementById('home-sub');
-    if(subEl) {
-      subEl.textContent = day.enTitle || day.hike || '';
-      setEditable(subEl, `days.${curDay-1}.enTitle`);
-    }
+    if(subEl) { subEl.textContent = day.enTitle || day.hike || ''; setEditable(subEl, `days.${curDay-1}.enTitle`); }
 
     const dateEl = document.getElementById('home-date');
-    if (dateEl) {
-      dateEl.textContent = day.date || '';
-      setEditable(dateEl, `days.${curDay-1}.date`);
-    }
+    if (dateEl) { dateEl.textContent = day.date || ''; setEditable(dateEl, `days.${curDay-1}.date`); }
 
     const hdNum = document.getElementById('home-daynum'); if(hdNum) hdNum.textContent=String(day.n).padStart(2,'0');
     const hdHdr = document.getElementById('hdr-day'); if(hdHdr) hdHdr.textContent=`יום ${day.n}/9`;
@@ -1075,22 +1093,16 @@ body:not(.global-edit-active) .edit-indicator {
     const cdSub=document.getElementById('home-countdown-sub');
     if(cdEl && cdSub){
       if(diffMs>0){
-        const days=Math.ceil(diffMs/(1000*60*60*24));
-        cdEl.textContent=days;
-        cdSub.textContent=days===1?'יום אחד נשאר!':'ימים עד הטיול';
+        const days=Math.ceil(diffMs/(1000*60*60*24)); cdEl.textContent=days; cdSub.textContent='ימים עד הטיול';
       } else if(diffMs>-(9*24*60*60*1000)){
-        cdEl.textContent='🏔️';
-        cdSub.textContent='הטיול מתחיל עכשיו!';
+        cdEl.textContent='🏔️'; cdSub.textContent='הטיול מתחיל עכשיו!';
       } else {
-        cdEl.textContent='✓';
-        cdSub.textContent='הטיול הסתיים';
+        cdEl.textContent='✓'; cdSub.textContent='הטיול הסתיים';
       }
     }
 
     const weeksEl=document.getElementById('home-countdown-weeks');
-    if(weeksEl){
-      weeksEl.textContent = diffMs>0 ? Math.floor(diffMs/(1000*60*60*24*7)) : (diffMs>-(9*24*60*60*1000)?'🏔️':'✓');
-    }
+    if(weeksEl){ weeksEl.textContent = diffMs>0 ? Math.floor(diffMs/(1000*60*60*24*7)) : '✓'; }
 
     const totalKm=db.days.reduce((s,d)=>s+(d.kmFoot||0),0);
     const kmEl = document.getElementById('home-total-km'); if(kmEl) kmEl.textContent=totalKm.toFixed(1);
@@ -1099,21 +1111,16 @@ body:not(.global-edit-active) .edit-indicator {
     const linaText = document.getElementById('home-lina-text');
     if(linaWrap && linaText) {
       if(day.bed){
-        linaWrap.style.display='flex';
-        linaText.textContent=day.bed;
-        setEditable(linaText, `days.${curDay-1}.bed`);
-      } else {
-        linaWrap.style.display='none';
-      }
+        linaWrap.style.display='flex'; linaText.textContent=day.bed; setEditable(linaText, `days.${curDay-1}.bed`);
+      } else { linaWrap.style.display='none'; }
     }
 
     const strip=document.getElementById('day-strip');
     if(strip) {
       strip.innerHTML='';
       db.days.forEach(d=>{
-        const a=d.n===curDay;
         const chip=document.createElement('button');
-        chip.className='day-chip'+(a?' active':'');
+        chip.className='day-chip'+(d.n===curDay?' active':'');
         chip.innerHTML=`<span class="day-num">${String(d.n).padStart(2,'0')}</span><span class="day-name">${shortName(d)}</span>`;
         chip.addEventListener('click',()=>{curDay=d.n; saveStateToFirebase();});
         strip.appendChild(chip);
@@ -1121,10 +1128,7 @@ body:not(.global-edit-active) .edit-indicator {
     }
 
     const uw=db.days.find(d=>d.warn&&d.n>=curDay);
-    const warnTxt = document.getElementById('home-warn-text');
-    if(uw && warnTxt) {
-      warnTxt.textContent=`יום ${uw.n}: ${uw.warn}`;
-    }
+    const warnTxt = document.getElementById('home-warn-text'); if(uw && warnTxt) warnTxt.textContent=`יום ${uw.n}: ${uw.warn}`;
   }
 
   function shortName(d){
@@ -1142,11 +1146,9 @@ body:not(.global-edit-active) .edit-indicator {
     db.days.forEach((day,idx)=>{
       const dk=`d${day.n}`;
       const pills=[];
-      if(day.kmFoot)  pills.push(`<span class="spill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 12C6 5 9 19 12 12C15 5 18 16 21 12" stroke="var(--green)" stroke-width="2.2" stroke-linecap="round"/></svg>${day.kmFoot} ק"מ ברגל</span>`);
-      if(day.elevUp)  pills.push(`<span class="spill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M6 11l6-6 6 6" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>+${day.elevUp}מ'</span>`);
-      if(day.elevDown)pills.push(`<span class="spill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M6 13l6 6 6-6" stroke="var(--blue)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>−${day.elevDown}מ'</span>`);
-      if(day.peakM)   pills.push(`<span class="spill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 19L9 7L13 13L16 8L21 19H3Z" stroke="var(--amber)" stroke-width="1.8" stroke-linejoin="round"/></svg>שיא ${day.peakM}מ'</span>`);
-      if(day.dur)     pills.push(`<span class="spill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--ink3)" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="var(--ink3)" stroke-width="1.8" stroke-linecap="round"/></svg>${day.dur}</span>`);
+      if(day.kmFoot)  pills.push(`<span class="spill">${day.kmFoot} ק"מ ברגל</span>`);
+      if(day.elevUp)  pills.push(`<span class="spill">+${day.elevUp}מ'</span>`);
+      if(day.dur)     pills.push(`<span class="spill">${day.dur}</span>`);
 
       const det=document.createElement('details');
       det.className='card';
@@ -1160,145 +1162,38 @@ body:not(.global-edit-active) .edit-indicator {
             <div style="min-width:0;">
               <h3 class="ft font-bold text-lg text-gray-900" id="it-title-${idx}">${day.heTitle}</h3>
               <p class="text-sm font-medium text-gray-500 mt-0.5" id="it-sub-${idx}"></p>
-              <p class="text-xs font-semibold text-gray-400 mt-0.5" id="it-date-${idx}"></p>
-              <div id="it-bed-row-${idx}" class="flex items-center gap-1 mt-1 text-sm font-bold text-gray-700">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 22V8L12 2L21 8V22H15V16H9V22H3Z" stroke="var(--amber)" stroke-width="1.8" stroke-linejoin="round"/></svg>
-                <span id="it-bed-${idx}"></span>
-              </div>
+              <div id="it-bed-row-${idx}" class="flex items-center gap-1 mt-1 text-sm font-bold text-gray-700"><span>🏡</span><span id="it-bed-${idx}"></span></div>
             </div>
           </div>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;transition:transform .2s;"><path d="M6 9l6 6 6-6" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div style="padding:0 18px 18px;border-top:0.5px solid var(--line2);">
           <div class="flex gap-2 flex-wrap mb-3 mt-3">
-            <button class="edit-indicator bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-amber-200" onclick="editDayNumericParams(${idx})">
-              ⚙️ הגדרת נתוני מסלול
-            </button>
+            <button class="edit-indicator bg-amber-50 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg border" onclick="editDayNumericParams(${idx})">⚙️ הגדרת נתוני מסלול</button>
           </div>
           ${pills.length?`<div class="flex flex-wrap gap-1.5 mb-3">${pills.join('')}</div>`:''}
-          
-          <p class="text-sm font-semibold text-gray-800 mb-2 italic" id="it-hike-${idx}"></p>
           <p class="text-[15px] leading-relaxed text-gray-700 mb-3 whitespace-pre-line" id="it-notes-${idx}"></p>
-          
-          <div class="warn mb-3" id="it-warn-box-${idx}">
-            <p style="font-size:13px;font-weight:700;color:#7A4010;margin:0 0 4px;">⚠ שים לב</p>
-            <p class="text-[15px] text-[#5A2E08] margin-0" id="it-warn-${idx}"></p>
-          </div>
-          
-          <div class="inner mb-3 bg-[#FDFAF3] border-color-[#E8DEB8]" id="it-tip-box-${idx}">
-            <p style="font-size:13px;font-weight:700;color:#5A4A10;margin:0 0 4px;">💡 טיפ</p>
-            <p class="text-[15px] text-gray-600 leading-relaxed margin-0" id="it-tip-${idx}"></p>
-          </div>
-
-          ${day.drive?`<div class="inner drive-row mb-3">
-            <span class="dr-label" id="it-dr-label-${idx}">🚗 ${day.drive}</span>
-            <span class="dr-time" id="it-dr-time-${idx}">${day.driveTime}</span>
-          </div>`:''}
-
-          ${day.mapEmbed?`<div class="mb-3">
-            <p style="font-size:12px;font-weight:700;color:var(--ink3);margin:0 0 6px;">🗺 מפת המסלול</p>
-            <div style="border-radius:12px;overflow:hidden;border:0.5px solid var(--line);">
-              <iframe src="${day.mapEmbed}" width="100%" height="300" style="border:none;display:block;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-              <a href="https://www.google.com/maps/d/viewer?mid=1WVsFveqJhkEW8OEJvpw3I1Lm8ttsgBY" target="_blank" class="maplink" style="flex:1;min-width:140px;padding:10px 14px;font-size:14px;font-weight:600;">Google Maps ↗</a>
-              ${day.mapEarth?`<a href="${day.mapEarth}" target="_blank" class="maplink" style="flex:1;min-width:140px;padding:10px 14px;font-size:14px;font-weight:600;">Google Earth ↗</a>`:''}
-            </div>
-          </div>`:day.map?`<a href="${day.map}" target="_blank" class="maplink mb-3" style="display:flex;"><span style="font-size:15px;font-weight:600;">פתיחת מפת המסלול</span><span style="color:var(--amber);margin-right:auto;font-size:18px;"> ↗</span></a>`:''}
-          
-          <p style="font-size:12px;font-weight:700;color:var(--ink3);margin:0 0 6px;letter-spacing:.03em;">צ׳ק ליסט לוגיסטי</p>
-          <div id="cl-${dk}"></div>
+          <div id="cl-${dk}" class="min-h-[20px]"></div>
           <div class="add-row"><input type="text" id="ai-${dk}" placeholder="הוספת פריט…"><button id="ab-${dk}">הוסף</button></div>
         </div>`;
 
       list.appendChild(det);
 
       setEditable(document.getElementById(`it-title-${idx}`), `days.${idx}.heTitle`);
-      
-      const sEl = document.getElementById(`it-sub-${idx}`);
-      sEl.textContent = day.enTitle || '';
-      setEditable(sEl, `days.${idx}.enTitle`);
-
-      const dEl = document.getElementById(`it-date-${idx}`);
-      dEl.textContent = day.date || '';
-      setEditable(dEl, `days.${idx}.date`);
-
-      const bEl = document.getElementById(`it-bed-${idx}`);
-      bEl.textContent = day.bed || '';
-      setEditable(bEl, `days.${idx}.bed`);
-      document.getElementById(`it-bed-row-${idx}`).style.display = day.bed ? 'flex' : 'none';
-
-      const hEl = document.getElementById(`it-hike-${idx}`);
-      hEl.textContent = day.hike || '';
-      setEditable(hEl, `days.${idx}.hike`);
-      hEl.style.display = day.hike ? 'block' : 'none';
-
-      const nEl = document.getElementById(`it-notes-${idx}`);
-      nEl.textContent = day.notes || '';
-      setEditable(nEl, `days.${idx}.notes`);
-
-      const wEl = document.getElementById(`it-warn-${idx}`);
-      wEl.textContent = day.warn || '';
-      setEditable(wEl, `days.${idx}.warn`);
-      document.getElementById(`it-warn-box-${idx}`).style.display = day.warn ? 'block' : 'none';
-
-      const tEl = document.getElementById(`it-tip-${idx}`);
-      tEl.textContent = day.tip || '';
-      setEditable(tEl, `days.${idx}.tip`);
-      document.getElementById(`it-tip-box-${idx}`).style.display = day.tip ? 'block' : 'none';
-
-      if (day.drive) {
-        setEditable(document.getElementById(`it-dr-label-${idx}`), `days.${idx}.drive`);
-        setEditable(document.getElementById(`it-dr-time-${idx}`), `days.${idx}.driveTime`);
-      }
-
-      det.addEventListener('toggle',()=>{det.querySelector('.chev').style.transform=det.open?'rotate(180deg)':'';});
-      if(det.open)det.querySelector('.chev').style.transform='rotate(180deg)';
-
-      const moveUp = (itemId) => {
-        const index = day.checks.findIndex(c => c.id === itemId);
-        if (index > 0) {
-          const temp = day.checks[index];
-          day.checks[index] = day.checks[index - 1];
-          day.checks[index - 1] = temp;
-          saveStateToFirebase();
-        }
-      };
-
-      const moveDown = (itemId) => {
-        const index = day.checks.findIndex(c => c.id === itemId);
-        if (index < day.checks.length - 1) {
-          const temp = day.checks[index];
-          day.checks[index] = day.checks[index + 1];
-          day.checks[index + 1] = temp;
-          saveStateToFirebase();
-        }
-      };
+      const sEl = document.getElementById(`it-sub-${idx}`); if(sEl) { sEl.textContent = day.enTitle || day.hike || ''; setEditable(sEl, `days.${idx}.enTitle`); }
+      const bEl = document.getElementById(`it-bed-${idx}`); if(bEl) { bEl.textContent = day.bed || ''; setEditable(bEl, `days.${idx}.bed`); }
+      const nEl = document.getElementById(`it-notes-${idx}`); if(nEl) { nEl.textContent = day.notes || ''; setEditable(nEl, `days.${idx}.notes`); }
 
       renderList({
         cont: document.getElementById(`cl-${dk}`),
         items: day.checks || [],
-        onRename: (itemId, txt) => {
-          const target = day.checks.find(c => c.id === itemId);
-          if (target) target.t = txt;
-          saveStateToFirebase();
-        },
-        onDel: (itemId) => {
-          day.checks = day.checks.filter(c => c.id !== itemId);
-          delete logSt[itemId];
-          saveStateToFirebase();
-        },
-        onMoveUp: moveUp,
-        onMoveDown: moveDown,
+        onRename: (itemId, txt) => { const target = day.checks.find(c => c.id === itemId); if (target) target.t = txt; saveStateToFirebase(); },
+        onDel: (itemId) => { day.checks = day.checks.filter(c => c.id !== itemId); delete logSt[itemId]; saveStateToFirebase(); },
         stObj: logSt,
         addId: `ai-${dk}`,
         btnId: `ab-${dk}`,
-        onAdd: (txt) => {
-          const id = uid(dk);
-          if(!day.checks) day.checks = [];
-          day.checks.push({ id, t: txt });
-          saveStateToFirebase();
-        }
+        onAdd: (txt) => { if(!day.checks) day.checks = []; day.checks.push({ id: uid(dk), t: txt }); saveStateToFirebase(); },
+        listType: 'itinerary',
+        listContext: dk
       });
     });
   }
@@ -1336,49 +1231,17 @@ body:not(.global-edit-active) .edit-indicator {
       PRE-FLIGHT MODULE
   ============================================================ */
   function renderPF(){
-    const moveUp = (itemId) => {
-      const index = db.preflight.findIndex(i => i.id === itemId);
-      if (index > 0) {
-        const temp = db.preflight[index];
-        db.preflight[index] = db.preflight[index - 1];
-        db.preflight[index - 1] = temp;
-        saveStateToFirebase();
-      }
-    };
-
-    const moveDown = (itemId) => {
-      const index = db.preflight.findIndex(i => i.id === itemId);
-      if (index < db.preflight.length - 1) {
-        const temp = db.preflight[index];
-        db.preflight[index] = db.preflight[index + 1];
-        db.preflight[index + 1] = temp;
-        saveStateToFirebase();
-      }
-    };
-
     renderList({
       cont:document.getElementById('pf-list'),
       items: db.preflight || [],
-      onRename: (id, text) => {
-        const target = db.preflight.find(i=>i.id===id);
-        if(target) target.t = text;
-        saveStateToFirebase();
-      },
-      onDel: (id) => {
-        db.preflight = db.preflight.filter(i=>i.id!==id);
-        delete pfSt[id];
-        saveStateToFirebase();
-      },
-      onMoveUp: moveUp,
-      onMoveDown: moveDown,
+      onRename: (id, text) => { const target = db.preflight.find(i=>i.id===id); if(target) target.t = text; saveStateToFirebase(); },
+      onDel: (id) => { db.preflight = db.preflight.filter(i=>i.id!==id); delete pfSt[id]; saveStateToFirebase(); },
       stObj: pfSt,
       addId: 'pf-inp',
       btnId: 'pf-add-btn',
-      onAdd: (val) => {
-        const id = uid('pf');
-        db.preflight.push({ id, t: val });
-        saveStateToFirebase();
-      }
+      onAdd: (val) => { db.preflight.push({ id: uid('pf'), t: val }); saveStateToFirebase(); },
+      listType: 'preflight',
+      listContext: 'global'
     });
   }
 
@@ -1386,89 +1249,40 @@ body:not(.global-edit-active) .edit-indicator {
       USEFUL TIPS MODULE
   ============================================================ */
   function renderTips() {
-    const cont = document.getElementById('useful-tips-list');
-    if (!cont) return;
+    const cont = document.getElementById('useful-tips-list'); if (!cont) return;
     cont.innerHTML = '';
-    
     db.tips.forEach((tip, idx) => {
       const tipDiv = document.createElement('div');
-      if (tip.type === 'info') {
-        tipDiv.className = 'info relative group p-4 space-y-1';
-        tipDiv.style.background = 'var(--blue2)';
-        tipDiv.style.borderColor = '#B8D4EA';
-      } else {
-        tipDiv.className = 'inner relative group space-y-1';
-      }
-      
+      tipDiv.className = 'inner relative group space-y-1';
       tipDiv.innerHTML = `
         <div class="flex items-center justify-between mb-1">
-          <p class="text-[14px] font-bold" style="color: ${tip.type === 'info' ? '#1A4E70' : 'var(--ink)'};" id="tip-t-${idx}">${tip.title}</p>
-          <div class="edit-indicator hidden items-center gap-1">
-            <button class="text-red-500 hover:text-red-700 text-xs font-bold bg-white/50 px-2 py-1 rounded" onclick="deleteUsefulTip(${idx})">מחק טיפ ✕</button>
-          </div>
+          <p class="text-[14px] font-bold" id="tip-t-${idx}">${tip.title}</p>
+          <button class="edit-indicator text-red-500 text-xs hidden font-bold" onclick="deleteUsefulTip(${idx})">✕</button>
         </div>
-        <p class="text-[14px] leading-relaxed whitespace-pre-line" style="color: ${tip.type === 'info' ? '#1A3A55' : 'var(--ink2)'};" id="tip-d-${idx}">${tip.desc}</p>
-      `;
-      
+        <p class="text-[14px] leading-relaxed whitespace-pre-line text-gray-600" id="tip-d-${idx}">${tip.desc}</p>`;
       cont.appendChild(tipDiv);
-      
       setEditable(document.getElementById(`tip-t-${idx}`), `tips.${idx}.title`);
       setEditable(document.getElementById(`tip-d-${idx}`), `tips.${idx}.desc`);
     });
-    
-    const addControl = document.getElementById('add-tip-control');
-    if (addControl) {
-      if (globalEditMode) {
-        addControl.classList.remove('hidden');
-        addControl.classList.add('flex');
-      } else {
-        addControl.classList.remove('flex');
-        addControl.classList.add('hidden');
-      }
-    }
   }
-
   function addUsefulTip() {
     const title = document.getElementById('new-tip-title').value.trim();
     const desc = document.getElementById('new-tip-desc').value.trim();
     if (!title || !desc) return;
-    
     if (!db.tips) db.tips = [];
-    db.tips.push({ id: `tip_${Date.now()}`, title: title, desc: desc, type: "inner" });
+    db.tips.push({ id: `tip_${Date.now()}`, title, desc, type: "inner" });
     saveStateToFirebase();
-    
-    document.getElementById('new-tip-title').value = '';
-    document.getElementById('new-tip-desc').value = '';
+    document.getElementById('new-tip-title').value = ''; document.getElementById('new-tip-desc').value = '';
   }
-
-  function deleteUsefulTip(idx) {
-    showConfirm('מחיקת טיפ שימושי', 'האם למחוק טיפ זה לצמיתות?', () => {
-      db.tips.splice(idx, 1);
-      saveStateToFirebase();
-    });
-  }
+  function deleteUsefulTip(idx) { showConfirm('מחיקת טיפ', 'למחוק טיפ זה?', () => { db.tips.splice(idx, 1); saveStateToFirebase(); }); }
 
   /* ============================================================
       PACKING LISTS MODULE
   ============================================================ */
   function renderPacking(){
-    const wrap=document.getElementById('pack-cats');
-    if(!wrap) return;
+    const wrap=document.getElementById('pack-cats'); if(!wrap) return;
     wrap.innerHTML='';
     let ci=0;
-
-    if (globalEditMode) {
-      const addCatDiv = document.createElement('div');
-      addCatDiv.className = 'card border-dashed border-2 border-amber-400 bg-amber-50/20 mb-4 p-4 text-center';
-      addCatDiv.innerHTML = `
-        <p class="text-sm font-bold text-amber-800 mb-2">➕ הוספת קטגוריית ציוד חדשה</p>
-        <div class="flex gap-2">
-          <input type="text" id="new-cat-name" placeholder="שם הקטגוריה (לדוגמה: בישול שטח)" class="flex-1 px-3 py-2 border rounded-lg text-sm bg-white">
-          <button onclick="addPackingCategory()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-lg text-sm">הוסף</button>
-        </div>
-      `;
-      wrap.appendChild(addCatDiv);
-    }
 
     Object.entries(db.packing).forEach(([cat, items])=>{
       const done=items.filter(i=>packSt[i.id]).length;
@@ -1476,97 +1290,26 @@ body:not(.global-edit-active) .edit-indicator {
       const card=document.createElement('div');
       card.className='card mb-4 relative';
       card.innerHTML=`
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <div class="flex items-center gap-2">
-            <h3 class="ft font-bold text-lg" data-editable-cat="${cat}">${cat}</h3>
-            <button class="edit-indicator text-red-500 hover:text-red-700 text-xs hidden" onclick="deletePackingCategory('${cat}')">🗑️ מחק קטגוריה</button>
-          </div>
-          <span style="font-size:13px;color:var(--ink3);">${done}/${items.length}</span>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="ft font-bold text-lg" data-editable-cat="${cat}">${cat}</h3>
+          <span class="text-xs text-gray-400">${done}/${items.length}</span>
         </div>
-        <div id="${sc}-b"></div>
+        <div id="${sc}-b" class="min-h-[20px]"></div>
         <div class="add-row"><input type="text" id="${sc}-i" placeholder="הוספת פריט…"><button id="${sc}-btn">הוסף</button></div>`;
       wrap.appendChild(card);
-
-      const catH3 = card.querySelector('[data-editable-cat]');
-      if (globalEditMode && catH3) {
-        catH3.setAttribute('contenteditable', 'true');
-        catH3.setAttribute('spellcheck', 'false');
-      }
-
-      const moveUp = (itemId) => {
-        const index = db.packing[cat].findIndex(i => i.id === itemId);
-        if (index > 0) {
-          const temp = db.packing[cat][index];
-          db.packing[cat][index] = db.packing[cat][index - 1];
-          db.packing[cat][index - 1] = temp;
-          saveStateToFirebase();
-        }
-      };
-
-      const moveDown = (itemId) => {
-        const index = db.packing[cat].findIndex(i => i.id === itemId);
-        if (index < db.packing[cat].length - 1) {
-          const temp = db.packing[cat][index];
-          db.packing[cat][index] = db.packing[cat][index + 1];
-          db.packing[cat][index + 1] = temp;
-          saveStateToFirebase();
-        }
-      };
 
       renderList({
         cont:document.getElementById(`${sc}-b`),
         items: items,
-        onRename: (id, text) => {
-          const target = items.find(i=>i.id===id);
-          if(target) target.t = text;
-          saveStateToFirebase();
-        },
-        onDel: (id) => {
-          db.packing[cat] = items.filter(i=>i.id!==id);
-          delete packSt[id];
-          saveStateToFirebase();
-        },
-        onMoveUp: moveUp,
-        onMoveDown: moveDown,
+        onRename: (id, text) => { const target = items.find(i=>i.id===id); if(target) target.t = text; saveStateToFirebase(); },
+        onDel: (id) => { db.packing[cat] = items.filter(i=>i.id!==id); delete packSt[id]; saveStateToFirebase(); },
         stObj: packSt,
         addId:`${sc}-i`,
         btnId:`${sc}-btn`,
-        onAdd:(t)=>{
-          const id=uid('pk');
-          db.packing[cat].push({id, t});
-          saveStateToFirebase();
-        }
+        onAdd:(t)=>{ db.packing[cat].push({id: uid('pk'), t}); saveStateToFirebase(); },
+        listType: 'packing',
+        listContext: cat
       });
-    });
-  }
-
-  document.addEventListener('blur', (e) => {
-    const cat = e.target.getAttribute('data-editable-cat');
-    if (cat) {
-      const next = e.target.innerText.trim();
-      if (next && next !== cat) {
-        if (db.packing[next]) { e.target.innerText = cat; return; }
-        db.packing[next] = db.packing[cat];
-        delete db.packing[cat];
-        saveStateToFirebase();
-      }
-    }
-  }, true);
-
-  function addPackingCategory() {
-    const inp = document.getElementById('new-cat-name');
-    const name = inp.value.trim();
-    if(!name) return;
-    if(db.packing[name]) return;
-    db.packing[name] = [];
-    saveStateToFirebase();
-  }
-
-  function deletePackingCategory(cat) {
-    showConfirm('מחיקת קטגוריה', `האם למחוק את הקטגוריה "${cat}" ואת כל הפריטים בה?`, () => {
-      db.packing[cat].forEach(i => delete packSt[i.id]);
-      delete db.packing[cat];
-      saveStateToFirebase();
     });
   }
 
@@ -1575,95 +1318,30 @@ body:not(.global-edit-active) .edit-indicator {
   ============================================================ */
   function renderLogistics(){
     const emgCont = document.getElementById('emg-list');
-    if(!emgCont) return;
-    emgCont.innerHTML = db.emergency.map((e, idx) => `
-      <div class="inner relative group" style="padding:12px 14px;">
-        <div class="flex items-center justify-between">
-          <p style="font-size:12px;color:var(--ink3);margin:0;" id="emg-l-${idx}">${e.l}</p>
-          <button class="edit-indicator text-red-500 hover:text-red-700 text-xs hidden absolute left-2 top-2 font-bold" onclick="deleteEmergency(${idx})">✕</button>
-        </div>
-        <p class="fm font-bold" style="font-size:18px;margin:3px 0 0;direction:ltr;text-align:left;" id="emg-v-${idx}">${e.v}</p>
-      </div>
-    `).join('');
-
-    db.emergency.forEach((e, idx) => {
-      setEditable(document.getElementById(`emg-l-${idx}`), `emergency.${idx}.l`);
-      setEditable(document.getElementById(`emg-v-${idx}`), `emergency.${idx}.v`);
-    });
-
-    if (globalEditMode) {
-      const addEmg = document.createElement('div');
-      addEmg.className = 'inner border-dashed border border-amber-400 bg-amber-50/20 flex flex-col gap-2';
-      addEmg.innerHTML = `
-        <p class="text-xs font-bold text-amber-800">➕ הוספת איש קשר לחירום</p>
-        <input type="text" id="new-emg-l" placeholder="שם (לדוגמה: משטרה מקומית)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
-        <input type="text" id="new-emg-v" placeholder="מספר טלפון" class="px-2 py-1 border rounded text-xs text-left fm bg-white text-gray-800">
-        <button onclick="addEmergency()" class="bg-amber-600 text-white font-bold py-1 rounded text-xs">שמור</button>
-      `;
-      emgCont.appendChild(addEmg);
+    if(emgCont) {
+      emgCont.innerHTML = db.emergency.map((e, idx) => `
+        <div class="inner relative group">
+          <p style="font-size:12px;color:var(--ink3);" id="emg-l-${idx}">${e.l}</p>
+          <p class="fm font-bold text-lg" id="emg-v-${idx}">${e.v}</p>
+        </div>`).join('');
+      db.emergency.forEach((e, idx) => {
+        setEditable(document.getElementById(`emg-l-${idx}`), `emergency.${idx}.l`);
+        setEditable(document.getElementById(`emg-v-${idx}`), `emergency.${idx}.v`);
+      });
     }
 
     const travelCont = document.getElementById('travel-list');
-    if(!travelCont) return;
-    travelCont.innerHTML = db.travels.map((r, idx) => `
-      <div class="inner drive-row relative group">
-        <div class="flex items-center justify-between">
+    if(travelCont) {
+      travelCont.innerHTML = db.travels.map((r, idx) => `
+        <div class="inner drive-row relative group">
           <span class="dr-label" id="tr-r-${idx}">${r.r}</span>
-          <button class="edit-indicator text-red-500 hover:text-red-700 text-xs hidden absolute left-2 top-2 font-bold" onclick="deleteTravel(${idx})">✕</button>
-        </div>
-        <span class="dr-time" id="tr-t-${idx}">${r.t}</span>
-      </div>
-    `).join('');
-
-    db.travels.forEach((r, idx) => {
-      setEditable(document.getElementById(`tr-r-${idx}`), `travels.${idx}.r`);
-      setEditable(document.getElementById(`tr-t-${idx}`), `travels.${idx}.t`);
-    });
-
-    if (globalEditMode) {
-      const addTravel = document.createElement('div');
-      addTravel.className = 'inner border-dashed border border-amber-400 bg-amber-50/20 flex flex-col gap-2';
-      addTravel.innerHTML = `
-        <p class="text-xs font-bold text-amber-800">➕ הוספת זמני נסיעה</p>
-        <input type="text" id="new-tr-r" placeholder="מסלול (לדוגמה: קרקוב ← זאקופנה)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
-        <input type="text" id="new-tr-t" placeholder="זמן וק\"מ (לדוגמה: ~2 שעות · 110 ק\"מ)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
-        <button onclick="addTravel()" class="bg-amber-600 text-white font-bold py-1 rounded text-xs">שמור</button>
-      `;
-      travelCont.appendChild(addTravel);
+          <span class="dr-time" id="tr-t-${idx}">${r.t}</span>
+        </div>`).join('');
+      db.travels.forEach((r, idx) => {
+        setEditable(document.getElementById(`tr-r-${idx}`), `travels.${idx}.r`);
+        setEditable(document.getElementById(`tr-t-${idx}`), `travels.${idx}.t`);
+      });
     }
-
-    const ta=document.getElementById('gen-notes');
-    if(ta) {
-      ta.value=localStorage.getItem('tv7_notes')||'';
-      ta.addEventListener('input',()=>localStorage.setItem('tv7_notes',ta.value));
-    }
-  }
-
-  function addEmergency() {
-    const l = document.getElementById('new-emg-l').value.trim();
-    const v = document.getElementById('new-emg-v').value.trim();
-    if(!l || !v) return;
-    db.emergency.push({ l, v });
-    saveStateToFirebase();
-  }
-  function deleteEmergency(idx) {
-    showConfirm('מחיקת איש קשר', 'האם למחוק איש קשר זה?', () => {
-      db.emergency.splice(idx, 1);
-      saveStateToFirebase();
-    });
-  }
-  function addTravel() {
-    const r = document.getElementById('new-tr-r').value.trim();
-    const t = document.getElementById('new-tr-t').value.trim();
-    if(!r || !t) return;
-    db.travels.push({ r, t });
-    saveStateToFirebase();
-  }
-  function deleteTravel(idx) {
-    showConfirm('מחיקת מסלול נסיעה', 'האם למחוק נתוני נסיעה אלו?', () => {
-      db.travels.splice(idx, 1);
-      saveStateToFirebase();
-    });
   }
 
   /* ============================================================
@@ -1671,105 +1349,37 @@ body:not(.global-edit-active) .edit-indicator {
   ============================================================ */
   function updateProgress(){
     let pTot=0, pDone=0;
-    Object.values(db.packing).forEach(items=>{
-      pTot += items.length;
-      pDone += items.filter(i=>packSt[i.id]).length;
-    });
-    
+    Object.values(db.packing).forEach(items=>{ pTot += items.length; pDone += items.filter(i=>packSt[i.id]).length; });
     const pPct=pTot?Math.round(pDone/pTot*100):0;
-    ['home-pack-pct','pack-pct'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=pPct+'%';});
-    ['home-pack-bar','pack-bar'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.width=pPct+'%';});
-    const pd=document.getElementById('pack-done');if(pd)pd.textContent=pDone;
-    const pt=document.getElementById('pack-total');if(pt)pt.textContent=pTot;
+    if(document.getElementById('home-pack-pct')) document.getElementById('home-pack-pct').textContent=pPct+'%';
+    if(document.getElementById('pack-pct')) document.getElementById('pack-pct').textContent=pPct+'%';
+    if(document.getElementById('home-pack-bar')) document.getElementById('home-pack-bar').style.width=pPct+'%';
+    if(document.getElementById('pack-bar')) document.getElementById('pack-bar').style.width=pPct+'%';
 
     const pfAll=db.preflight || [];
     const pfDone=pfAll.filter(i=>pfSt[i.id]).length;
     const pfPct=pfAll.length?Math.round(pfDone/pfAll.length*100):0;
-    const pfb=document.getElementById('pf-bar');if(pfb)pfb.style.width=pfPct+'%';
-    const pfp=document.getElementById('pf-pct');if(pfp)pfp.textContent=pfPct+'%';
-    const pfd=document.getElementById('pf-done');if(pfd)pfd.textContent=pfDone;
-    const pft=document.getElementById('pf-total');if(pft)pft.textContent=pfAll.length;
+    if(document.getElementById('pf-bar')) document.getElementById('pf-bar').style.width=pfPct+'%';
+    if(document.getElementById('pf-pct')) document.getElementById('pf-pct').textContent=pfPct+'%';
+    if(document.getElementById('pf-done')) document.getElementById('pf-done').textContent=pfDone;
+    if(document.getElementById('pf-total')) document.getElementById('pf-total').textContent=pfAll.length;
   }
 
-  /* ============================================================
-      CUSTOM CONFIRM MODAL
-  ============================================================ */
-  let confirmAction = null;
-  function showConfirm(title, msg, onConfirm) {
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-msg').textContent = msg;
-    document.getElementById('custom-confirm-modal').style.display = 'flex';
-    confirmAction = () => { onConfirm(); closeConfirmModal(); };
-  }
-  function closeConfirmModal() {
-    document.getElementById('custom-confirm-modal').style.display = 'none';
-    confirmAction = null;
-  }
-  document.getElementById('confirm-btn-yes').addEventListener('click', () => { if (confirmAction) confirmAction(); });
-
-  /* ============================================================
-      TAB ENGINE (WITH LOCALSTORAGE PERSISTENCE)
-  ============================================================ */
-  function setTab(tab, isInitial = false){
-    currentTab = tab;
-    localStorage.setItem('tatra_current_tab', tab);
-    
-    document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
-    const viewEl = document.getElementById('view-'+tab);
-    if(viewEl) viewEl.classList.remove('hidden');
-    
-    document.querySelectorAll('.tab-btn').forEach(b=>{
-      b.className='tab-btn px-4 py-2 rounded-full text-sm '+(b.dataset.tab===tab?'tab-act':'tab-off');
-    });
-    document.querySelectorAll('.tab-mobile').forEach(b=>{
-      b.className='tab-mobile flex flex-col items-center gap-1 py-3 '+(b.dataset.tab===tab?'mob-act':'mob-off');
-    });
-    if(!isInitial) window.scrollTo({top:0,behavior:'instant'});
-  }
-  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
-
-  /* ============================================================
-      SYNCHRONIZED RENDERING ENGINE
-  ============================================================ */
   function renderAllModules() {
-    const titleH1 = document.getElementById('site-title');
-    if(titleH1) { titleH1.textContent = db.title; setEditable(titleH1, "title"); }
-
-    const subtitleP = document.getElementById('site-subtitle');
-    if(subtitleP) { subtitleP.textContent = db.subtitle; setEditable(subtitleP, "subtitle"); }
-
-    renderHome();
-    renderItinerary();
-    renderPF();
-    renderPacking();
-    renderLogistics();
-    renderTips();
-    renderExps();
-    updateProgress();
+    renderHome(); renderItinerary(); renderPF(); renderPacking(); renderLogistics(); renderTips(); renderExps(); updateProgress();
   }
 
-  /* ============================================================
-      INITIALIZATION & REALTIME SYNC LISTENER
-  ============================================================ */
   function init(){
     initCur();
     const savedTab = localStorage.getItem('tatra_current_tab') || 'home';
-
     appStateRef.on('value', (snapshot) => {
       const data = snapshot.val();
       if (data) {
         if (data.db) db = data.db;
-        logSt = data.logSt || {};
-        packSt = data.packSt || {};
-        pfSt = data.pfSt || {};
-        curDay = data.curDay || 1;
-        expenses = data.expenses || [];
-      } else {
-        saveStateToFirebase();
-      }
+        logSt = data.logSt || {}; packSt = data.packSt || {}; pfSt = data.pfSt || {}; curDay = data.curDay || 1; expenses = data.expenses || [];
+      } else { saveStateToFirebase(); }
       renderAllModules();
     });
-
     setTab(savedTab, true);
   }
   init();
@@ -1780,109 +1390,36 @@ body:not(.global-edit-active) .edit-indicator {
       BIRTHDAY MODAL + CONFETTI CONTROLS
   ============================================================ */
   const BDAY_KEY = 'tatra_bday_seen';
-  let bdayOpened = false;
-
   function openBday(){
     if (globalEditMode) return;
-    bdayOpened = true;
     sessionStorage.setItem(BDAY_KEY, '1');
-    stopTitlePulse();
-    const modal = document.getElementById('bday-modal');
-    modal.style.display = 'flex';
+    document.getElementById('bday-modal').style.display = 'flex';
     startConfetti();
   }
-
-  function closeBday(){
-    document.getElementById('bday-modal').style.display = 'none';
-    stopConfetti();
-  }
-
-  document.getElementById('site-title').addEventListener('click', openBday);
-
-  let pulseInterval = null;
-  function doPulse(){
-    if(sessionStorage.getItem(BDAY_KEY)){ stopTitlePulse(); return; }
-    const el = document.getElementById('site-title');
-    if(!el) return;
-    el.style.transition = 'font-size .3s cubic-bezier(.34,1.56,.64,1), color .3s ease';
-    el.style.fontSize = '28px';
-    el.style.color = '#C97B3C';
-    setTimeout(()=>{
-      el.style.fontSize = '20px';
-      el.style.color = 'var(--ink)';
-    }, 700);
-  }
-
-  function startTitlePulse(){
-    if(sessionStorage.getItem(BDAY_KEY)) return;
-    doPulse();
-    pulseInterval = setInterval(doPulse, 60000);
-  }
-
-  function stopTitlePulse(){
-    clearInterval(pulseInterval);
-    const el = document.getElementById('site-title');
-    if(el){ el.style.fontSize = '20px'; el.style.color = 'var(--ink)'; }
-  }
-
-  setTimeout(() => { startTitlePulse(); }, 800);
+  function closeBday(){ document.getElementById('bday-modal').style.display = 'none'; stopConfetti(); }
+  if(document.getElementById('site-title')) document.getElementById('site-title').addEventListener('click', openBday);
 
   let confettiAnimId = null;
-  const COLORS = ['#C97B3C','#E8A855','#7A8B6F','#3D6E8F','#D4A843','#E86B3C','#7FBF6F','#5B8FBF'];
-
   function startConfetti(){
-    const canvas = document.getElementById('confetti-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
+    const canvas = document.getElementById('confetti-canvas'); if(!canvas) return;
+    const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     const particles = Array.from({length:140}, ()=>({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
-      r: Math.random() * 7 + 4,
-      color: COLORS[Math.floor(Math.random()*COLORS.length)],
-      vx: (Math.random()-0.5)*3,
-      vy: Math.random()*3+2,
-      rot: Math.random()*360,
-      vrot: (Math.random()-0.5)*6,
-      shape: Math.random()>.5 ? 'rect' : 'circle',
-      w: Math.random()*10+5,
-      h: Math.random()*6+3,
-      opacity: Math.random()*.4+.6
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 7 + 4, color: ['#C97B3C','#E8A855','#7A8B6F','#3D6E8F'][Math.floor(Math.random()*4)],
+      vx: (Math.random()-0.5)*3, vy: Math.random()*3+2, rot: Math.random()*360, vrot: (Math.random()-0.5)*6, opacity: Math.random()*.4+.6
     }));
-
     function draw(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
       particles.forEach(p=>{
-        ctx.save();
-        ctx.globalAlpha = p.opacity;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot*Math.PI/180);
-        ctx.fillStyle = p.color;
-        if(p.shape==='rect'){
-          ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-        } else {
-          ctx.beginPath();
-          ctx.arc(0,0,p.r,0,Math.PI*2);
-          ctx.fill();
-        }
-        ctx.restore();
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rot += p.vrot;
-        if(p.y > canvas.height + 20) p.y = -20;
+        ctx.save(); ctx.globalAlpha = p.opacity; ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+        p.x += p.vx; p.y += p.vy; p.rot += p.vrot; if(p.y > canvas.height + 20) p.y = -20;
       });
       confettiAnimId = requestAnimationFrame(draw);
     }
     draw();
   }
-
-  function stopConfetti(){
-    if(confettiAnimId) cancelAnimationFrame(confettiAnimId);
-    const canvas = document.getElementById('confetti-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-  }
+  function stopConfetti(){ if(confettiAnimId) cancelAnimationFrame(confettiAnimId); }
 </script>
 </body>
 </html>
