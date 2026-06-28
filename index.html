@@ -171,6 +171,7 @@ body:not(.global-edit-active) .edit-indicator {
 </head>
 <body class="min-h-screen pb-32 md:pb-20">
 
+<!-- HEADER -->
 <header class="sticky top-0 z-30 nav-glass border-b" style="border-color:var(--line)">
   <div class="max-w-4xl mx-auto px-4 md:px-6">
     <div class="flex items-center justify-between h-14">
@@ -198,8 +199,10 @@ body:not(.global-edit-active) .edit-indicator {
 
 <main class="max-w-4xl mx-auto px-4 md:px-6 pt-5">
 
+<!-- ===== HOME ===== -->
 <section id="view-home" class="view space-y-4">
 
+  <!-- current day card -->
   <div class="card">
     <div class="flex items-start justify-between gap-3">
       <div style="flex:1;min-width:0">
@@ -214,6 +217,7 @@ body:not(.global-edit-active) .edit-indicator {
       </div>
     </div>
 
+    <!-- accommodation prominent -->
     <div class="lina-row mt-3" id="home-lina" style="display:none">
       <div class="lina-icon">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 22V8L12 2L21 8V22H15V16H9V22H3Z" stroke="var(--amber)" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -224,11 +228,13 @@ body:not(.global-edit-active) .edit-indicator {
       </div>
     </div>
 
+    <!-- day chips strip -->
     <div style="overflow-x:auto;padding-bottom:4px;margin-top:16px;margin-left:-18px;margin-right:-18px;padding-left:18px;padding-right:18px;">
       <div id="day-strip" style="display:flex;gap:8px;width:max-content;padding-bottom:4px;"></div>
     </div>
   </div>
 
+  <!-- stats row: countdown + km -->
   <div class="grid grid-cols-3 gap-3">
     <div class="card-sm" style="text-align:center;">
       <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">שבועות לטיול</p>
@@ -247,6 +253,7 @@ body:not(.global-edit-active) .edit-indicator {
     </div>
   </div>
 
+  <!-- packing progress -->
   <div class="card-sm">
     <div class="flex items-center justify-between mb-2">
       <p style="font-size:14px;color:var(--ink2);margin:0">ציוד ארוז</p>
@@ -255,6 +262,7 @@ body:not(.global-edit-active) .edit-indicator {
     <div class="pt" style="height:6px"><div class="pf" id="home-pack-bar" style="width:0%"></div></div>
   </div>
 
+  <!-- 3-way currency -->
   <div class="card">
     <h3 class="ft font-bold mb-3" style="font-size:19px">ממיר מטבעות</h3>
     <div class="grid grid-cols-3 gap-2">
@@ -274,6 +282,7 @@ body:not(.global-edit-active) .edit-indicator {
     <p style="font-size:12px;color:var(--ink3);margin-top:8px">1€ ≈ 3.95₪ ≈ 4.30zł · שנה כל אחד — האחרים מתעדכנים</p>
   </div>
 
+  <!-- expenses -->
   <div class="card">
     <div class="flex items-center justify-between mb-3">
       <h3 class="ft font-bold" style="font-size:19px">מעקב הוצאות</h3>
@@ -324,6 +333,7 @@ body:not(.global-edit-active) .edit-indicator {
   </div>
 </section>
 
+<!-- ===== ITINERARY ===== -->
 <section id="view-itinerary" class="view hidden">
   <div class="flex items-center justify-between mb-4">
     <h2 class="ft font-bold" style="font-size:24px">מסלול יומי</h2>
@@ -332,6 +342,7 @@ body:not(.global-edit-active) .edit-indicator {
   <div id="itin-list"></div>
 </section>
 
+<!-- ===== PRE-FLIGHT ===== -->
 <section id="view-preflight" class="view hidden space-y-4">
   <div class="card">
     <div class="flex items-center justify-between">
@@ -378,6 +389,7 @@ body:not(.global-edit-active) .edit-indicator {
     </a>
   </div>
   
+  <!-- DYNAMIC EDITABLE USEFUL TIPS -->
   <div class="card space-y-3">
     <h3 class="ft font-bold" style="font-size:19px">טיפים שימושיים</h3>
     <div id="useful-tips-list" class="space-y-3"></div>
@@ -390,6 +402,7 @@ body:not(.global-edit-active) .edit-indicator {
   </div>
 </section>
 
+<!-- ===== PACKING ===== -->
 <section id="view-packing" class="view hidden">
   <div class="card mb-4">
     <div class="flex items-center justify-between">
@@ -404,6 +417,7 @@ body:not(.global-edit-active) .edit-indicator {
   <div id="pack-cats" class="space-y-4"></div>
 </section>
 
+<!-- ===== LOGISTICS ===== -->
 <section id="view-logistics" class="view hidden space-y-4">
   <h2 class="ft font-bold" style="font-size:24px">לוגיסטיקה וכלים</h2>
   <div class="card">
@@ -423,6 +437,7 @@ body:not(.global-edit-active) .edit-indicator {
 
 </main>
 
+<!-- MOBILE NAV -->
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 nav-glass border-t" style="border-color:var(--line)">
   <div class="grid grid-cols-5 max-w-4xl mx-auto" style="padding-bottom:env(safe-area-inset-bottom)">
     <button data-tab="home" class="tab-mobile mob-act flex flex-col items-center gap-1 py-3">
@@ -448,6 +463,7 @@ body:not(.global-edit-active) .edit-indicator {
   </div>
 </nav>
 
+<!-- GLOBAL FLOATING EDIT BUTTON -->
 <button id="global-edit-btn" class="fixed bottom-24 md:bottom-6 right-6 z-40 flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-xl rounded-full px-5 py-3 font-semibold transition-all duration-200">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 20h9"></path>
@@ -456,6 +472,7 @@ body:not(.global-edit-active) .edit-indicator {
   <span id="global-edit-text">עריכת עמוד</span>
 </button>
 
+<!-- CUSTOM CONFIRM MODAL -->
 <div id="custom-confirm-modal" style="display:none;" class="fixed inset-0 z-50 items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
   <div class="relative z-10 bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
@@ -469,6 +486,7 @@ body:not(.global-edit-active) .edit-indicator {
   </div>
 </div>
 
+<!-- DAY STATS EDIT MODAL -->
 <div id="day-stats-modal" style="display:none;" class="fixed inset-0 z-50 items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDayStatsModal()"></div>
   <div class="relative z-10 bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
@@ -503,6 +521,7 @@ body:not(.global-edit-active) .edit-indicator {
   </div>
 </div>
 
+<!-- BIRTHDAY MODAL -->
 <div id="bday-modal" style="display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;">
   <div id="bday-backdrop" style="position:absolute;inset:0;background:#EDEAE0;opacity:0.92;" onclick="closeBday()"></div>
   <div style="position:relative;z-index:1;background:var(--surf);border-radius:24px;padding:36px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.18);">
@@ -516,11 +535,11 @@ body:not(.global-edit-active) .edit-indicator {
   <canvas id="confetti-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:101;"></canvas>
 </div>
 
+<!-- GOOGLE FIREBASE CORE COMPAT LIBRARIES -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
-  // חיבור ישיר לפרויקט הפיירבייס הקיים שלך
   const firebaseConfig = {
     apiKey: "AIzaSyAqYU2v2IPY0k71BrDsy9UsOvjsPT3j-lk",
     authDomain: "mylist-8c827.firebaseapp.com",
@@ -552,7 +571,7 @@ body:not(.global-edit-active) .edit-indicator {
       ],
       notes:"יום נסיעה. הטיסה נוחתת בקרקוב בשעה 8:30. עצירה בסופרמרקט ובדקטלון בדרך, ואז נסיעה ישירה ל-Tatranská Lomnica.",
       map:null, warn:null,
-      drive:"קרקוב → Tatranská Lomnica",driveTime:"~2.5 שעות (180 ק\"מ)"
+      drive:"קרקוב → Tatranská Lomnica",driveTime:"~2.5 שעות (180 ק"מ)"
     },
     {
       n:2, date:"2.9 · יום רביעי", heTitle:"גן עדן סלובקי — Suchá Belá", enTitle:"Suchá Belá Loop", hike:"Suchá Belá Loop", bed:"Tatranská Lomnica",
@@ -563,7 +582,7 @@ body:not(.global-edit-active) .edit-indicator {
       ],
       notes:"קניון עם סולמות, שרשראות ומפלים. המסלול חד-כיווני — עלייה בקניון, ירידה בנתיב אחר.",
       map:"https://www.alltrails.com/trail/slovakia/kosice--3/okruh-sucha-bela", warn:null,
-      drive:"Tatranská Lomnica → Podlesok",driveTime:"~35 דקות (28 ק\"מ)"
+      drive:"Tatranská Lomnica → Podlesok",driveTime:"~35 דקות (28 ק"מ)"
     },
     {
       n:3, date:"3.9 · יום חמישי", heTitle:"גן עדן סלובקי — Piecky", enTitle:"Piecky Canyon", hike:"Piecky", bed:"Tatranská Lomnica",
@@ -597,7 +616,7 @@ body:not(.global-edit-active) .edit-indicator {
     },
     {
       n:5, date:"5.9 · יום שבת", heTitle:"מהבקתה עד Tatranská Javorina", enTitle:"Javorová dolina → Tatranská Javorina",
-      hike:"Veľké Biele Pleso → Javorová dolina → Tatranská Javorina", bed:"Zakopane",
+      hike:"Ve|ké Biele Pleso → Javorová dolina → Tatranská Javorina", bed:"Zakopane",
       kmFoot:12.5,elevUp:320,elevDown:null,peakM:1770,dur:"4–5 שעות",
       checks:[
         {id:"d5a",t:"לשמור מספר מונית מראש: FH Taxi או Tatry Taxi"},
@@ -606,9 +625,11 @@ body:not(.global-edit-active) .edit-indicator {
         {id:"d5d",t:"איסוף הרכב בחניון Biela Voda"},
         {id:"d5e",t:"נסיעה דרך הגבול ל-Zakopane"}
       ],
-      notes:"מתחיל בבקתה Chata pri Zelenom plese ומסתיים ב-Tatranská Javorina — מסלול ליניארי.\n\n⚠ שים לב! לבדוק מראש על מוניות או אוטובוסים, ולשמור מספרי טלפון וזמני נסיעה לפני יציאה לשביל.",
+      notes:"מתחיל בבקתה Chata pri Zelenom plese ומסתיים ב-Tatranská Javorina — מסלול ליניארי.
+
+⚠ שים לב! לבדוק מראש על מוניות או אוטובוסים, ולשמור מספרי טלפון וזמני נסיעה לפני יציאה לשביל.",
       map:"https://www.alltrails.com/explore/custom-routes/zelene-pleso-to-tatranska-javorina-8c84238", warn:null,
-      drive:"Tatranská Javorina → Zakopane",driveTime:"~50 דקות (45 ק\"מ, כולל מעבר גבול)"
+      drive:"Tatranská Javorina → Zakopane",driveTime:"~50 דקות (45 ק"מ, כולל מעבר גבול)"
     },
     {
       n:6, date:"6.9 · יום ראשון", heTitle:"Kasprowy Wierch ואגמי הטטרה", enTitle:"Kasprowy Wierch → Czarny Staw",
@@ -623,7 +644,7 @@ body:not(.global-edit-active) .edit-indicator {
       ],
       notes:"עולים ברכבל ל-Kasprowy Wierch (1,987מ'), ואז יורדים ברגל דרך Hala Gąsienicowa עד האגם השחור Czarny Staw Gąsienicowy.",
       map:"https://www.alltrails.com/explore/custom-routes/kasprowy-wierch-to-kuznice-78f9bf9", warn:null,
-      drive:"Zakopane → Kuźnice",driveTime:"~10 דקות (5 ק\"מ)"
+      drive:"Zakopane → Kuźnice",driveTime:"~10 דקות (5 ק"מ)"
     },
     {
       n:7, date:"7.9 · יום שני", heTitle:"Morskie Oko וחמשת האגמים הפולניים", enTitle:"Dolina Pięciu Stawów → Morskie Oko",
@@ -636,10 +657,10 @@ body:not(.global-edit-active) .edit-indicator {
         {id:"d7d",t:"להביא לפחות 300 PLN מזומן לכרכרות"},
         {id:"d7e",t:"לשקול כרכרה הלוך וחזור לחסוך רגליים"}
       ],
-      notes:"היום התובעני ביותר — 19 ק\"מ ו-1,100מ' טיפוס. כרכרה רתומה לסוסים זמינה בדרך הגישה לחסוך ברגליים.",
+      notes:"היום התובעני ביותר — 19 ק"מ ו-1,100מ' טיפוס. כרכרה רתומה לסוסים זמינה בדרך הגישה לחסוך ברגליים.",
       map:"https://www.alltrails.com/explore/custom-routes/dolina-pieciu-stawow-polskich-to-morskie-oko-eec497e",
       warn:"יום אלפיני קשה — לצאת מוקדם ולעקוב אחר מזג האוויר. 300 PLN מזומן לכרכרות. להזמין חניה מראש!",
-      drive:"Zakopane → Palenica Białczańska",driveTime:"~25 דקות (20 ק\"מ)"
+      drive:"Zakopane → Palenica Białczańska",driveTime:"~25 דקות (20 ק"מ)"
     },
     {
       n:8, date:"8.9 · יום שלישי", heTitle:"ספא Chochołowskie Termy וקרקוב", enTitle:"Chochołowskie Termy + Kraków",
@@ -652,9 +673,13 @@ body:not(.global-edit-active) .edit-indicator {
         {id:"d8d",t:"החזרת הרכב השכור"},
         {id:"d8e",t:"טיול בעיר העתיקה של קרקוב"}
       ],
-      notes:"מחירון Chochołowskie Termy:\n• 3 שעות בריכות: ~99–109 zł למבוגר\n• 4 שעות Open (בריכות + סאונות): ~125–149 zł\n• יום שלם בריכות: ~129–149 zł\n• יום שלם Open (הכול): ~155–189 zł",
+      notes:"מחירון Chochołowskie Termy:
+• 3 שעות בריכות: ~99–109 zł למבוגר
+• 4 שעות Open (בריכות + סאונות): ~125–149 zł
+• יום שלם בריכות: ~129–149 zł
+• יום שלם Open (הכול): ~155–189 zł",
       map:"https://www.chocholowskietermy.pl/en/", warn:null,
-      drive:"Zakopane → Termy → קרקוב",driveTime:"~20 דק׳ + ~2 שעות"
+      drive:"Zakopane → Termy → קרקוב",driveTime:"~20 דק״ + ~2 שעות"
     },
     {
       n:9, date:"9.9 · יום רביעי", heTitle:"טיסה הביתה — 23:55", enTitle:null, hike:null, bed:null,
@@ -738,12 +763,12 @@ body:not(.global-edit-active) .edit-indicator {
     {l:"סיוע דרכים — חברת ההשכרה",v:"לפי הסכם"}
   ],
   travels:[
-    {r:"קרקוב → Tatranská Lomnica",t:"~2.5 שעות · 180 ק\"מ"},
-    {r:"Tatranská Lomnica → Podlesok (יום 2)",t:"~35 דקות · 28 ק\"מ"},
+    {r:"קרקוב → Tatranská Lomnica",t:"~2.5 שעות · 180 ק"מ"},
+    {r:"Tatranská Lomnica → Podlesok (יום 2)",t:"~35 דקות · 28 ק"מ"},
     {r:"Tatranská Lomnica → Piecky (יום 3)",t:"~30 דקות"},
-    {r:"Tatranská Javorina → Zakopane (יום 5)",t:"~50 דקות · 45 ק\"מ"},
-    {r:"Zakopane → Kuźnice (יום 6)",t:"~10 דקות · 5 ק\"מ"},
-    {r:"Zakopane → Palenica Białczańska (יום 7)",t:"~25 דקות · 20 ק\"מ"},
+    {r:"Tatranská Javorina → Zakopane (יום 5)",t:"~50 דקות · 45 ק"מ"},
+    {r:"Zakopane → Kuźnice (יום 6)",t:"~10 דקות · 5 ק"מ"},
+    {r:"Zakopane → Palenica Białczańska (יום 7)",t:"~25 דקות · 20 ק"מ"},
     {r:"Zakopane → Chochołowskie Termy (יום 8)",t:"~20 דקות"},
     {r:"Chochołowskie Termy → קרקוב",t:"~2 שעות"}
   ],
@@ -760,9 +785,12 @@ body:not(.global-edit-active) .edit-indicator {
     {id:"ke8b",desc:"כניסה לשמורה — 2 אנשים (יום 7)",amt:18,currency:"PLN",type:"cash"}
   ],
   tips: [
-    { id: "tip_water", title: "💧 מים בשביל", desc: "לא צריך לסחוב יותר מ-1.5 ליטר. אי אפשר לשתות מהברזים בשביל, אבל בבקתות אפשר לקנות מינרלי ב-5€. אם יש רכב, לקנות מראש ולהשאיר באוטו.", type: "info" },
-    { id: "tip_super", title: "🛒 קניות בסופר עם נחיתה", desc: "מים · חטיפי אנרגיה · פירות יבשים · אגוזים · שוקולד · לחם · גבינות · פירות · חטיפים אחרים · שמפו · מרכך · סבון", type: "inner" },
-    { id: "tip_krakow", title: "🛍️ קניות בקרקוב ביום האחרון", desc: "• סופר-פארם — סרום The Ordinary Botox + Elf Setting Spray\n• חנויות וינטג׳ בקרקוב\n• חנויות יצירה?\n• לעשות הזמנה מיוניקלו מראש", type: "inner" }
+    { id: "tip_water", title: "?? מים בשביל", desc: "לא צריך לסחוב יותר מ-1.5 ליטר. אי אפשר לשתות מהברזים בשביל, אבל בבקתות אפשר לקנות מינרלי ב-5€. אם יש רכב, לקנות מראש ולהשאיר באוטו.", type: "info" },
+    { id: "tip_super", title: "?? קניות בסופר עם נחיתה", desc: "מים · חטיפי אנרגיה · פירות יבשים · אגוזים · שוקולד · לחם · גבינות · פירות · חטיפים אחרים · שמפו · מרכך · סבון", type: "inner" },
+    { id: "tip_krakow", title: "??️ קניות בקרקוב ביום האחרון", desc: "• סופר-פארם — סרום The Ordinary Botox + Elf Setting Spray
+• חנויות וינטגֱ בקרקוב
+• חנויות יצירה?
+• לעשות הזמנה מיוניקלו מראש", type: "inner" }
   ]
   };
 
@@ -888,7 +916,7 @@ body:not(.global-edit-active) .edit-indicator {
       UNIVERSAL DIRECT EDITABLE CHECKBOX COMPONENT
   ============================================================ */
   const TICK=`<svg class="tk" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  function makeRow(id, text, checked, stObj, onDel, onRename) {
+  function makeRow(id, text, checked, stObj, onDel, onRename, onMoveUp, onMoveDown, isFirst, isLast) {
     const row = document.createElement('div');
     row.className = 'flex items-start gap-3 py-2.5 border-b border-gray-200/60 group relative';
 
@@ -910,6 +938,19 @@ body:not(.global-edit-active) .edit-indicator {
 
     const actions = document.createElement('div');
     actions.className = 'edit-indicator items-center gap-1 absolute left-2 top-2 bg-white/90 pl-1 rounded hidden';
+
+    // חיצים לשינוי סדר
+    const upBtn = document.createElement('button');
+    upBtn.className = 'text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 disabled:opacity-20 font-bold text-xs';
+    upBtn.innerHTML = '↑';
+    upBtn.disabled = isFirst;
+    upBtn.onclick = (e) => { e.preventDefault(); onMoveUp(id); };
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 disabled:opacity-20 font-bold text-xs';
+    downBtn.innerHTML = '↓';
+    downBtn.disabled = isLast;
+    downBtn.onclick = (e) => { e.preventDefault(); onMoveDown(id); };
 
     const editBtn = document.createElement('button');
     editBtn.className = 'text-amber-600 hover:text-amber-700 p-1 rounded hover:bg-amber-50';
@@ -944,17 +985,19 @@ body:not(.global-edit-active) .edit-indicator {
     delBtn.innerHTML = '✕';
     delBtn.addEventListener('click', () => { showConfirm('מחיקת פריט', `האם למחוק את "${text}"?`, () => onDel(id)); });
 
+    actions.appendChild(upBtn);
+    actions.appendChild(downBtn);
     actions.appendChild(editBtn);
     actions.appendChild(delBtn);
     row.appendChild(actions);
     return row;
   }
 
-  function renderList({ cont, items, onRename, onDel, stObj, addId, btnId, onAdd }) {
+  function renderList({ cont, items, onRename, onDel, onMoveUp, onMoveDown, stObj, addId, btnId, onAdd }) {
     if(!cont) return;
     cont.innerHTML = '';
     items.forEach((item, i) => {
-      const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, onDel, onRename);
+      const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, onDel, onRename, onMoveUp, onMoveDown, i === 0, i === items.length - 1);
       if (i === items.length - 1) row.style.borderBottom = 'none';
       cont.appendChild(row);
     });
@@ -1242,6 +1285,26 @@ body:not(.global-edit-active) .edit-indicator {
       det.addEventListener('toggle',()=>{det.querySelector('.chev').style.transform=det.open?'rotate(180deg)':'';});
       if(det.open)det.querySelector('.chev').style.transform='rotate(180deg)';
 
+      const moveUp = (itemId) => {
+        const index = day.checks.findIndex(c => c.id === itemId);
+        if (index > 0) {
+          const temp = day.checks[index];
+          day.checks[index] = day.checks[index - 1];
+          day.checks[index - 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+
+      const moveDown = (itemId) => {
+        const index = day.checks.findIndex(c => c.id === itemId);
+        if (index < day.checks.length - 1) {
+          const temp = day.checks[index];
+          day.checks[index] = day.checks[index + 1];
+          day.checks[index + 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+
       renderList({
         cont: document.getElementById(`cl-${dk}`),
         items: day.checks || [],
@@ -1255,6 +1318,8 @@ body:not(.global-edit-active) .edit-indicator {
           delete logSt[itemId];
           saveStateToFirebase();
         },
+        onMoveUp: moveUp,
+        onMoveDown: moveDown,
         stObj: logSt,
         addId: `ai-${dk}`,
         btnId: `ab-${dk}`,
@@ -1301,6 +1366,26 @@ body:not(.global-edit-active) .edit-indicator {
       PRE-FLIGHT MODULE
   ============================================================ */
   function renderPF(){
+    const moveUp = (itemId) => {
+      const index = db.preflight.findIndex(i => i.id === itemId);
+      if (index > 0) {
+        const temp = db.preflight[index];
+        db.preflight[index] = db.preflight[index - 1];
+        db.preflight[index - 1] = temp;
+        saveStateToFirebase();
+      }
+    };
+
+    const moveDown = (itemId) => {
+      const index = db.preflight.findIndex(i => i.id === itemId);
+      if (index < db.preflight.length - 1) {
+        const temp = db.preflight[index];
+        db.preflight[index] = db.preflight[index + 1];
+        db.preflight[index + 1] = temp;
+        saveStateToFirebase();
+      }
+    };
+
     renderList({
       cont:document.getElementById('pf-list'),
       items: db.preflight || [],
@@ -1314,25 +1399,17 @@ body:not(.global-edit-active) .edit-indicator {
         delete pfSt[id];
         saveStateToFirebase();
       },
+      onMoveUp: moveUp,
+      onMoveDown: moveDown,
       stObj: pfSt,
-      addId: null,
-      btnId: null,
-      onAdd: () => {}
-    });
-
-    const inp = document.getElementById('pf-inp');
-    const btn = document.getElementById('pf-add-btn');
-    if(inp && btn) {
-      btn.onclick = () => {
-        const val = inp.value.trim();
-        if(!val) return;
+      addId: 'pf-inp',
+      btnId: 'pf-add-btn',
+      onAdd: (val) => {
         const id = uid('pf');
         db.preflight.push({ id, t: val });
         saveStateToFirebase();
-        inp.value = '';
-      };
-      inp.onkeydown = e => { if (e.key === 'Enter') btn.click(); };
-    }
+      }
+    });
   }
 
   /* ============================================================
@@ -1446,6 +1523,26 @@ body:not(.global-edit-active) .edit-indicator {
         catH3.setAttribute('spellcheck', 'false');
       }
 
+      const moveUp = (itemId) => {
+        const index = db.packing[cat].findIndex(i => i.id === itemId);
+        if (index > 0) {
+          const temp = db.packing[cat][index];
+          db.packing[cat][index] = db.packing[cat][index - 1];
+          db.packing[cat][index - 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+
+      const moveDown = (itemId) => {
+        const index = db.packing[cat].findIndex(i => i.id === itemId);
+        if (index < db.packing[cat].length - 1) {
+          const temp = db.packing[cat][index];
+          db.packing[cat][index] = db.packing[cat][index + 1];
+          db.packing[cat][index + 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+
       renderList({
         cont:document.getElementById(`${sc}-b`),
         items: items,
@@ -1459,6 +1556,8 @@ body:not(.global-edit-active) .edit-indicator {
           delete packSt[id];
           saveStateToFirebase();
         },
+        onMoveUp: moveUp,
+        onMoveDown: moveDown,
         stObj: packSt,
         addId:`${sc}-i`,
         btnId:`${sc}-btn`,
@@ -1557,7 +1656,7 @@ body:not(.global-edit-active) .edit-indicator {
       addTravel.innerHTML = `
         <p class="text-xs font-bold text-amber-800">➕ הוספת זמני נסיעה</p>
         <input type="text" id="new-tr-r" placeholder="מסלול (לדוגמה: קרקוב ← זאקופנה)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
-        <input type="text" id="new-tr-t" placeholder="זמן וק\"מ (לדוגמה: ~2 שעות · 110 ק\"מ)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
+        <input type="text" id="new-tr-t" placeholder="זמן וק"מ (לדוגמה: ~2 שעות · 110 ק"מ)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
         <button onclick="addTravel()" class="bg-amber-600 text-white font-bold py-1 rounded text-xs">שמור</button>
       `;
       travelCont.appendChild(addTravel);
