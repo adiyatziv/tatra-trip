@@ -79,10 +79,25 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
 .info{background:var(--blue2);border:0.5px solid #B8D4EA;border-radius:12px;padding:14px 16px;}
 .attn{background:#FFF8EB;border:1.5px solid var(--amber);border-radius:12px;padding:14px 16px;}
 
-/* EDIT MODE */
-.edit-mode [data-editable]{outline:none;border-radius:6px;background:rgba(201,123,60,.08);box-shadow:0 0 0 1.5px var(--amber);padding:2px 4px;margin:-2px -4px;cursor:text;}
-.edit-mode [data-editable]:focus{background:rgba(201,123,60,.14);box-shadow:0 0 0 2px var(--amber);}
-[data-editable]{border-radius:4px;transition:background .1s;}
+/* EDIT MODE INDICATION */
+body.global-edit-active [data-editable-field] {
+  outline: 1.5px dashed var(--amber);
+  outline-offset: 4px;
+  background: rgba(201,123,60,.06);
+  border-radius: 4px;
+  cursor: text;
+}
+body.global-edit-active [data-editable-field]:focus {
+  background: rgba(201,123,60,.12);
+  outline: 2px solid var(--amber);
+}
+body.global-edit-active .edit-indicator {
+  display: inline-flex !important;
+}
+body:not(.global-edit-active) .edit-indicator {
+  display: none !important;
+}
+
 .edit-btn{display:flex;align-items:center;gap:6px;background:var(--surf2);border:0.5px solid var(--line);border-radius:8px;padding:6px 12px;font-family:'Assistant',sans-serif;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:background .15s;}
 .edit-btn:hover{background:var(--amber2);}
 .edit-btn.active{background:var(--amber);color:#fff;border-color:var(--amber);}
@@ -102,11 +117,20 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
 .maplink{background:var(--surf2);border:0.5px dashed var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-decoration:none;color:inherit;transition:background .15s;}
 .maplink:hover{background:var(--line2);}
 
-/* CURRENCY */
+/* CURRENCY SELECTION RESET (MOBILE & PC) */
 .curbox{background:var(--surf2);border:0.5px solid var(--line);border-radius:12px;padding:14px;}
 .curbox label{font-size:15px;color:var(--ink3);display:block;margin-bottom:4px;font-weight:600;}
-.curbox input{width:100%;border:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--ink);font-weight:500;direction:ltr;}
+.curbox input{
+  width:100%;border:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--ink);font-weight:500;direction:ltr;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-user-select: all !important;
+  user-select: all !important;
+}
 .curbox input:focus{outline:none;}
+.curbox input::selection{background:transparent !important;color:var(--ink) !important;}
+.curbox input::-moz-selection{background:transparent !important;color:var(--ink) !important;}
+.curbox input::-webkit-selection{background:transparent !important;color:var(--ink) !important;}
+.curbox input:focus,.curbox input:focus-visible{outline:none !important;box-shadow:none !important;}
 .cursym{font-size:14px;font-weight:700;color:var(--ink2);}
 
 /* STAT PILLS */
@@ -144,7 +168,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
 :focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 </style>
 </head>
-<body class="min-h-screen pb-24 md:pb-8">
+<body class="min-h-screen pb-32 md:pb-20">
 
 <!-- HEADER -->
 <header class="sticky top-0 z-30 nav-glass border-b" style="border-color:var(--line)">
@@ -157,7 +181,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
         </svg>
         <div>
           <h1 class="ft font-bold" id="site-title" style="font-size:20px;line-height:1.1;cursor:pointer;transition:font-size .4s ease,color .3s ease;">טיול טאטרה</h1>
-          <p style="font-size:14px;color:var(--ink3)">9 ימים · סלובקיה ופולין</p>
+          <p id="site-subtitle" style="font-size:14px;color:var(--ink3)">9 ימים · סלובקיה ופולין</p>
         </div>
       </div>
       <nav class="hidden md:flex items-center gap-1 p-1 rounded-full" style="background:var(--surf2)">
@@ -219,7 +243,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
     <div class="card-sm" style="text-align:center;">
       <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">ימים לטיול</p>
       <p class="ft font-bold" style="font-size:36px;color:var(--amber);margin:0;line-height:1" id="home-countdown">—</p>
-      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0" id="home-countdown-sub">עד 3.9.2026</p>
+      <p style="font-size:12px;color:var(--ink3);margin:2px 0 0" id="home-countdown-sub">עד 1.9.2026</p>
     </div>
     <div class="card-sm" style="text-align:center;">
       <p style="font-size:13px;color:var(--ink3);margin:0 0 2px">ק"מ הליכה</p>
@@ -331,7 +355,7 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
   </div>
   <div class="card">
     <div id="pf-list"></div>
-    <div class="add-row"><input type="text" id="pf-inp" placeholder="הוספת משימה…"><button onclick="addPF()">הוסף</button></div>
+    <div class="add-row"><input type="text" id="pf-inp" placeholder="הוספת משימה…"><button id="pf-add-btn">הוסף</button></div>
   </div>
   <div class="card space-y-2">
     <h3 class="ft font-bold mb-2" style="font-size:19px">קישורים שימושיים</h3>
@@ -363,15 +387,16 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
       <div><p style="font-size:15px;font-weight:500;margin:0">מפת המסלולים — Google Earth</p><p style="font-size:12px;color:var(--ink3);margin:0">תצוגת תלת-מימד של השביל</p></div><span style="color:var(--amber);margin-right:auto">↗</span>
     </a>
   </div>
+  
+  <!-- DYNAMIC EDITABLE USEFUL TIPS -->
   <div class="card space-y-3">
     <h3 class="ft font-bold" style="font-size:19px">טיפים שימושיים</h3>
-    <div class="info">
-      <p style="font-size:14px;font-weight:700;color:#1A4E70;margin:0 0 4px">💧 מים בשביל</p>
-      <p style="font-size:14px;color:#1A3A55;line-height:1.6;margin:0">לא צריך לסחוב יותר מ-1.5 ליטר. אי אפשר לשתות מהברזים בשביל, אבל בבקתות אפשר לקנות מינרלי ב-5€. אם יש רכב, לקנות מראש ולהשאיר באוטו.</p>
-    </div>
-    <div class="inner">
-      <p style="font-size:14px;font-weight:700;color:var(--ink);margin:0 0 4px">🛒 קניות בסופר עם נחיתה</p>
-      <p style="font-size:14px;color:var(--ink2);line-height:1.7;margin:0">מים · חטיפי אנרגיה · פירות יבשים · אגוזים · שוקולד · לחם · גבינות · פירות · חטיפים אחרים</p>
+    <div id="useful-tips-list" class="space-y-3"></div>
+    <div class="edit-indicator hidden flex-col gap-2 pt-2 border-t" id="add-tip-control">
+      <p class="text-xs font-bold text-amber-800">➕ הוספת טיפ חדש</p>
+      <input type="text" id="new-tip-title" placeholder="כותרת הטיפ (לדוגמה: 📱 סים מקומי)" class="px-3 py-2 border rounded-xl text-sm bg-white text-gray-800">
+      <textarea id="new-tip-desc" placeholder="תוכן הטיפ..." rows="2" class="px-3 py-2 border rounded-xl text-sm bg-white text-gray-800"></textarea>
+      <button onclick="addUsefulTip()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-sm">הוסף טיפ</button>
     </div>
   </div>
 </section>
@@ -437,29 +462,87 @@ body{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.6;}
   </div>
 </nav>
 
+<!-- GLOBAL FLOATING EDIT BUTTON -->
+<button id="global-edit-btn" class="fixed bottom-24 md:bottom-6 right-6 z-40 flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-xl rounded-full px-5 py-3 font-semibold transition-all duration-200">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20h9"></path>
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+  </svg>
+  <span id="global-edit-text">עריכת עמוד</span>
+</button>
+
+<!-- CUSTOM CONFIRM MODAL -->
+<div id="custom-confirm-modal" style="display:none;" class="fixed inset-0 z-50 items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
+  <div class="relative z-10 bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
+    <div class="text-3xl mb-2">⚠</div>
+    <h3 class="font-bold text-lg text-gray-800 mb-2" id="confirm-title">אישור פעולה</h3>
+    <p class="text-sm text-gray-600 mb-5" id="confirm-msg">האם את בטוחה שברצונך לבצע פעולה זו?</p>
+    <div class="flex gap-2">
+      <button id="confirm-btn-yes" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm">אישור</button>
+      <button onclick="closeConfirmModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAY STATS EDIT MODAL -->
+<div id="day-stats-modal" style="display:none;" class="fixed inset-0 z-50 items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDayStatsModal()"></div>
+  <div class="relative z-10 bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+    <h3 class="font-bold text-lg text-gray-800 mb-4 text-center">הגדרת נתוני מסלול יומי</h3>
+    <input type="hidden" id="edit-day-idx">
+    <div class="space-y-3 mb-5">
+      <div>
+        <label class="block text-xs text-gray-500 font-bold mb-1">ק"מ ברגל (השאירו ריק אם אין הליכה):</label>
+        <input type="number" step="0.1" id="edit-day-km" class="w-full px-3 py-2 border rounded-xl text-sm fm bg-gray-50 focus:bg-white">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 font-bold mb-1">עליית גובה במטרים (+):</label>
+        <input type="number" id="edit-day-up" class="w-full px-3 py-2 border rounded-xl text-sm fm bg-gray-50 focus:bg-white">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 font-bold mb-1">ירידת גובה במטרים (-):</label>
+        <input type="number" id="edit-day-down" class="w-full px-3 py-2 border rounded-xl text-sm fm bg-gray-50 focus:bg-white">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 font-bold mb-1">גובה שיא במטרים (M):</label>
+        <input type="number" id="edit-day-peak" class="w-full px-3 py-2 border rounded-xl text-sm fm bg-gray-50 focus:bg-white">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 font-bold mb-1">משך זמן מוערך:</label>
+        <input type="text" id="edit-day-dur" placeholder="לדוגמה: 4–5 שעות" class="w-full px-3 py-2 border rounded-xl text-sm bg-gray-50 focus:bg-white">
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="saveDayStats()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-sm">שמור שינויים</button>
+      <button onclick="closeDayStatsModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm">ביטול</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============================================================
-   TRIP DATA
+   TRIP DATA (ORIGINAL FALLBACK)
 ============================================================ */
 const D = {
 days:[
   {
-    n:1, date:"3.9 · יום שישי", heTitle:"נחיתה בקרקוב", enTitle:null, hike:null, bed:"Tatranská Lomnica",
+    n:1, date:"1.9 · יום שלישי", heTitle:"נחיתה בקרקוב — 8:30", enTitle:null, hike:null, bed:"Tatranská Lomnica",
     kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
     checks:[
-      {id:"d1a",t:"נחיתה בשדה התעופה קרקוב ~14:00"},
+      {id:"d1a",t:"נחיתה בשדה התעופה קרקוב 8:30"},
       {id:"d1b",t:"איסוף רכב שכור"},
       {id:"d1c",t:"עצירה בסופרמרקט"},
       {id:"d1d",t:"עצירה בדקטלון"},
       {id:"d1e",t:"נסיעה ל-Tatranská Lomnica (~2.5 שעות)"},
       {id:"d1f",t:"צ'ק אין ללינה"}
     ],
-    notes:"יום נסיעה. הטיסה נוחתת בקרקוב בשעה 14:00. עצירה בסופרמרקט ובדקטלון בדרך, ואז נסיעה ישירה ל-Tatranská Lomnica.",
+    notes:"יום נסיעה. הטיסה נוחתת בקרקוב בשעה 8:30. עצירה בסופרמרקט ובדקטלון בדרך, ואז נסיעה ישירה ל-Tatranská Lomnica.",
     map:null, warn:null,
     drive:"קרקוב → Tatranská Lomnica",driveTime:"~2.5 שעות (180 ק\"מ)"
   },
   {
-    n:2, date:"4.9 · יום שבת", heTitle:"גן עדן סלובקי — Suchá Belá", enTitle:"Suchá Belá Loop", hike:"Suchá Belá Loop", bed:"Tatranská Lomnica",
+    n:2, date:"2.9 · יום רביעי", heTitle:"גן עדן סלובקי — Suchá Belá", enTitle:"Suchá Belá Loop", hike:"Suchá Belá Loop", bed:"Tatranská Lomnica",
     kmFoot:9.2,elevUp:480,elevDown:480,peakM:966,dur:"4–5 שעות",
     checks:[
       {id:"d2a",t:"חניה ב-Podlesok parking lot"},
@@ -470,7 +553,7 @@ days:[
     drive:"Tatranská Lomnica → Podlesok",driveTime:"~35 דקות (28 ק\"מ)"
   },
   {
-    n:3, date:"5.9 · יום ראשון", heTitle:"גן עדן סלובקי — Piecky", enTitle:"Piecky Canyon", hike:"Piecky", bed:"Tatranská Lomnica",
+    n:3, date:"3.9 · יום חמישי", heTitle:"גן עדן סלובקי — Piecky", enTitle:"Piecky Canyon", hike:"Piecky", bed:"Tatranská Lomnica",
     kmFoot:11.5,elevUp:530,elevDown:530,peakM:1100,dur:"4–5 שעות",
     checks:[
       {id:"d3a",t:"חניה בחניון ליד תחילת המסלול"},
@@ -481,7 +564,7 @@ days:[
     drive:"Tatranská Lomnica → Piecky",driveTime:"~30 דקות"
   },
   {
-    n:4, date:"6.9 · יום שני", heTitle:"פסגת Lomnický štít ולינה בבקתה", enTitle:"Lomnický štít → Zelené Pleso",
+    n:4, date:"4.9 · יום שישי", heTitle:"פסגת Lomnický štít ולינה בבקתה", enTitle:"Lomnický štít → Zelené Pleso",
     hike:"Skalnaté Pleso → Lomnický štít → Tatranská magistrála → Zelené Pleso", bed:"Chata pri Zelenom plese",
     kmFoot:5.4,elevUp:330,elevDown:500,peakM:2020,dur:"2–3 שעות",
     checks:[
@@ -500,7 +583,7 @@ days:[
     drive:null, driveTime:null
   },
   {
-    n:5, date:"7.9 · יום שלישי", heTitle:"מהבקתה עד Tatranská Javorina", enTitle:"Javorová dolina → Tatranská Javorina",
+    n:5, date:"5.9 · יום שבת", heTitle:"מהבקתה עד Tatranská Javorina", enTitle:"Javorová dolina → Tatranská Javorina",
     hike:"Veľké Biele Pleso → Javorová dolina → Tatranská Javorina", bed:"Zakopane",
     kmFoot:12.5,elevUp:320,elevDown:null,peakM:1770,dur:"4–5 שעות",
     checks:[
@@ -515,7 +598,7 @@ days:[
     drive:"Tatranská Javorina → Zakopane",driveTime:"~50 דקות (45 ק\"מ, כולל מעבר גבול)"
   },
   {
-    n:6, date:"8.9 · יום רביעי", heTitle:"Kasprowy Wierch ואגמי הטטרה", enTitle:"Kasprowy Wierch → Czarny Staw",
+    n:6, date:"6.9 · יום ראשון", heTitle:"Kasprowy Wierch ואגמי הטטרה", enTitle:"Kasprowy Wierch → Czarny Staw",
     hike:"Kuźnice → Kasprowy Wierch → Hala Gąsienicowa → Czarny Staw Gąsienicowy", bed:"Zakopane",
     kmFoot:10.4,elevUp:200,elevDown:1000,peakM:2000,dur:"4–5 שעות",
     checks:[
@@ -530,7 +613,7 @@ days:[
     drive:"Zakopane → Kuźnice",driveTime:"~10 דקות (5 ק\"מ)"
   },
   {
-    n:7, date:"9.9 · יום חמישי", heTitle:"Morskie Oko וחמשת האגמים הפולניים", enTitle:"Dolina Pięciu Stawów → Morskie Oko",
+    n:7, date:"7.9 · יום שני", heTitle:"Morskie Oko וחמשת האגמים הפולניים", enTitle:"Dolina Pięciu Stawów → Morskie Oko",
     hike:"Palenica Białczańska → Dolina Pięciu Stawów Polskich → Świstówka Roztocka → Morskie Oko", bed:"Zakopane",
     kmFoot:20.3,elevUp:1100,elevDown:1100,peakM:1850,dur:"7–9 שעות",
     checks:[
@@ -538,7 +621,7 @@ days:[
       {id:"d7b",t:"חניה ב-Palenica Białczańska"},
       {id:"d7c",t:"כניסה לשמורה — 9 zł לאדם = 18 zł לשניים"},
       {id:"d7d",t:"להביא לפחות 300 PLN מזומן לכרכרות"},
-      {id:"d7d",t:"לשקול כרכרה הלוך וחזור לחסוך רגליים"}
+      {id:"d7e",t:"לשקול כרכרה הלוך וחזור לחסוך רגליים"}
     ],
     notes:"היום התובעני ביותר — 19 ק\"מ ו-1,100מ' טיפוס. כרכרה רתומה לסוסים זמינה בדרך הגישה לחסוך ברגליים.",
     map:"https://www.alltrails.com/explore/custom-routes/dolina-pieciu-stawow-polskich-to-morskie-oko-eec497e",
@@ -546,7 +629,7 @@ days:[
     drive:"Zakopane → Palenica Białczańska",driveTime:"~25 דקות (20 ק\"מ)"
   },
   {
-    n:8, date:"10.9 · יום שישי", heTitle:"ספא Chochołowskie Termy וקרקוב", enTitle:"Chochołowskie Termy + Kraków",
+    n:8, date:"8.9 · יום שלישי", heTitle:"ספא Chochołowskie Termy וקרקוב", enTitle:"Chochołowskie Termy + Kraków",
     hike:"יום מנוחה וספא", bed:"Hilton Garden Inn Krakow Airport",
     kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
     checks:[
@@ -561,13 +644,13 @@ days:[
     drive:"Zakopane → Termy → קרקוב",driveTime:"~20 דק׳ + ~2 שעות"
   },
   {
-    n:9, date:"11.9 · יום שבת", heTitle:"טיסה הביתה", enTitle:null, hike:null, bed:null,
+    n:9, date:"9.9 · יום רביעי", heTitle:"טיסה הביתה — 23:55", enTitle:null, hike:null, bed:null,
     kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
     checks:[
-      {id:"d9a",t:"להיות בשדה התעופה בשעה 3:00 בלילה (טיסה ב-5:30)"},
-      {id:"d9b",t:"להזמין מונית מהלילה הקודם!"}
+      {id:"d9a",t:"טיסה יוצאת 23:55 מקרקוב לישראל"},
+      {id:"d9b",t:"להגיע לשדה בשעה 21:30 לפחות"}
     ],
-    notes:"הטיסה ב-5:30 בבוקר — להיות בשדה עד 3:00 בלילה. לסדר הסעה מראש.",
+    notes:"הטיסה יוצאת ב-23:55 מקרקוב לישראל. להגיע לשדה בסביבות 21:30.",
     map:null, warn:null, drive:null, driveTime:null
   }
 ],
@@ -585,16 +668,55 @@ preflight:[
   {id:"pf11",t:"פולין — דקטלון? הזמנה מיוניקלו?"},
   {id:"pf12",t:"להזמין מגנוס / טלפון לוויני"},
   {id:"pf13",t:"לברר כמה עולה מונית ל-Kuźnice (יום 6)"},
-  {id:"pf14",t:"לוודא שמעיל הגשם אטום ואיכותי לתנאי הרים"}
+  {id:"pf14",t:"לוודא שמעיל הגשם אטום ואיכותי לתנאי הרים"},
+  {id:"pf15",t:"לגזור ציפורניים לפני הטיול"},
+  {id:"pf16",t:"לקחת מההורים: תיקים / מוצילה / מזוודה"},
+  {id:"pf17",t:"לקחת מההורים: כפכפים ליונתן"},
+  {id:"pf18",t:"לקחת מההורים: תיק רחצה"},
+  {id:"pf19",t:"לקחת מההורים: ספוג ישיבה"},
+  {id:"pf20",t:"לקחת מההורים: שקיות רב-פעמיות / שקים"},
+  {id:"pf21",t:"לקחת מההורים: שמפואים קטנים? (לבדוק)"}
 ],
 packing:{
   "ביגוד":["כובע","משקפי שמש + חוט ביטחון","כפפות","כובע גרב","2 מכנסיים לטיולים","2 חולצות קצרות מנדפות","דרייפיט ארוכה","חולצה תרמית","פליז","עליונית נגד מים","עליונית פוך","מכנס טרנינג לערב ולשינה","תחתונים (כמה זוגות)","גרביים לטיולים","גרבי טאבי לערב"],
-  "נעליים":["כפכפים","נעלי הליכה"],
-  "טואלטיקה":["מגבת טיולים","מגבת קטנה","תיק כלי רחצה נתלה","שמפו","סבון","מרכך","עדשות + נוזל","דאודורנט","מברשת ומשחת שיניים","קרם הגנה","קרם פנים","קרם ידיים","שפתון","אלכוג'ל"],
-  "ציוד וחירום":["מקלות הליכה","בקבוק מים","שלוקר","פנס ראש","שמיכת מילוט","ליינר","כיסוי לתיק גשם","אטמי אוזניים + כיסוי עיניים","עזרה ראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדי ליבלות, אדוויל, מיגרנה, קלבטן, אלרגיה)","סכין","מנעול","תיק טיסה","קליפס לאוכל","עט","שקיות לאוכל","נייר טואלט","שקית לטישו שטח"],
+  "נעליים":["כפכפים — לקחת מההורים ליונתן","נעלי הליכה","נעלי בית מהסטאי"],
+  "טואלטיקה":[
+    "מגבת טיולים",
+    "מגבת קטנה — לקחת בתיק יום, לנגב, לשבת על סלע",
+    "תיק כלי רחצה נתלה",
+    "וו תליה",
+    "שמפו","סבון","מרכך",
+    "בקבוק קטן: סבון פנים (פאמפ)",
+    "בקבוק קטן: שמן פנים (פאמפ)",
+    "בקבוק קטן: שמן שיער (פיפטה)",
+    "בקבוק קטן: סרום (פאמפ ייעודי)",
+    "בקבוק קטן: קרם שיער (פאמפ/מיכל)",
+    "כמה סרומים (פיפטה)",
+    "איפור — פודרה קטנה, קונסילר, טינט, קונטור, לגבות, מסקרה",
+    "מברשת שיער",
+    "עדשות","נוזל עדשות קטן","דאודורנט",
+    "מברשת ומשחת שיניים",
+    "קרם הגנה","קרם ידיים קטן","שפתון","אלכוג'ל"
+  ],
+  "ציוד וחירום":[
+    "מקלות הליכה","בקבוק מים","פילטר מים?","שלוקר",
+    "אטמים וכיסוי עיניים","פנס ראש",
+    "שמיכת מילוט","ליינר","כיסוי לתיק",
+    "שאקלים + שאקלים לתליה",
+    "ערכת תפירה וסיכות ביטחון",
+    "עזרה ראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדים ליבלות, משחה לכוויות, כדורים: אדוויל, מיגרנה, קלבטן, בחילות, אלרגיה, אזיקונים, חוט)",
+    "שקית לטישו שטח",
+    "שקיות לאוכל בכמה גדלים (דרכון תמיד בפנים)",
+    "נייר טואלט",
+    "שמיכה לכסות ציוד באוטו",
+    "שמיכה ורודה לפיקניק",
+    "ספוג לשבת עליו — לקחת מההורים",
+    "תיק גדול","תיק יום","תיק dry bag","תיק טיסה",
+    "מנעול","סכין","קליפס לאוכל","עט"
+  ],
   "מסמכים וכסף":["דרכון","רישיון נהיגה","אשראי","מזומן EUR","מזומן PLN"],
-  "אלקטרוניקה":["מטען","מטען נייד 10,000","אוזניות","כבלים","טלפון לוויני"],
-  "אוכל לשביל":["מסטיקים","אגוזים","פירות יבשים","חטיפי אנרגיה","שוקולד"]
+  "אלקטרוניקה":["מטען","מטען נייד קטן 10,000","אוזניות","כבלים","טלפון לוויני"],
+  "אוכל לשביל":["מסטיקים","אגוזים למיניהם / ממתקים / חטיף אנרגיה"]
 },
 emergency:[
   {l:"חירום אירופי",v:"112"},
@@ -623,26 +745,79 @@ knownExpenses:[
   {id:"ke7b",desc:"כניסה לשמורה — 2 אנשים (יום 6)",amt:18,currency:"PLN",type:"cash"},
   {id:"ke8",desc:"כרכרות Morskie Oko — מינימום (יום 7)",amt:300,currency:"PLN",type:"cash"},
   {id:"ke8b",desc:"כניסה לשמורה — 2 אנשים (יום 7)",amt:18,currency:"PLN",type:"cash"}
+],
+tips: [
+  { id: "tip_water", title: "💧 מים בשביל", desc: "לא צריך לסחוב יותר מ-1.5 ליטר. אי אפשר לשתות מהברזים בשביל, אבל בבקתות אפשר לקנות מינרלי ב-5€. אם יש רכב, לקנות מראש ולהשאיר באוטו.", type: "info" },
+  { id: "tip_super", title: "🛒 קניות בסופר עם נחיתה", desc: "מים · חטיפי אנרגיה · פירות יבשים · אגוזים · שוקולד · לחם · גבינות · פירות · חטיפים אחרים · שמפו · מרכך · סבון", type: "inner" },
+  { id: "tip_krakow", title: "🛍️ קניות בקרקוב ביום האחרון", desc: "• סופר-פארם — סרום The Ordinary Botox + Elf Setting Spray\n• חנויות וינטג׳ בקרקוב\n• חנויות יצירה?\n• לעשות הזמנה מיוניקלו מראש", type: "inner" }
 ]
 };
 
 /* ============================================================
-   STATE
+   STATE MANAGEMENT (INTEGRATED SINGLE DB)
 ============================================================ */
-const SK={log:"tv6_log",pack:"tv6_pack",pf:"tv6_pf",cust:"tv6_cust",notes:"tv6_notes",day:"tv6_day",exps:"tv6_exps"};
+const SK={
+  db:"tatra_db_v10", // Updated DB Key for clean migration
+  log:"tv7_log",
+  pack:"tv8_pack",
+  pf:"tv8_pf",
+  notes:"tv7_notes",
+  day:"tv7_day",
+  exps:"tv7_exps"
+};
+
 const load=(k,fb)=>{try{const r=localStorage.getItem(k);return r?JSON.parse(r):fb;}catch(e){return fb;}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+
+// Initialize full editable DB
+let db = load(SK.db, null);
+if(!db) {
+  db = JSON.parse(JSON.stringify(D));
+  db.title = "טיול טאטרה";
+  db.subtitle = "9 ימים · סלובקיה ופולין";
+  
+  // Normalize packing to uniform object containing [{id, t}]
+  const normP = {};
+  Object.entries(D.packing).forEach(([cat, items]) => {
+    normP[cat] = items.map((it, idx) => ({ id: `pk_${cat}_${idx}_${Date.now()}`, t: it }));
+  });
+  db.packing = normP;
+  save(SK.db, db);
+}
+
+// Fallback dynamic migration for Tips if upgrading from existing db
+if (!db.tips) {
+  db.tips = [
+    { id: "tip_water", title: "💧 מים בשביל", desc: "לא צריך לסחוב יותר מ-1.5 ליטר. אי אפשר לשתות מהברזים בשביל, אבל בבקתות אפשר לקנות מינרלי ב-5€. אם יש רכב, לקנות מראש ולהשאיר באוטו.", type: "info" },
+    { id: "tip_super", title: "🛒 קניות בסופר עם נחיתה", desc: "מים · חטיפי אנרגיה · פירות יבשים · אגוזים · שוקולד · לחם · גבינות · פירות · חטיפים אחרים · שמפו · מרכך · סבון", type: "inner" },
+    { id: "tip_krakow", title: "🛍️ קניות בקרקוב ביום האחרון", desc: "• סופר-פארם — סרום The Ordinary Botox + Elf Setting Spray\n• חנויות וינטג׳ בקרקוב\n• חנויות יצירה?\n• לעשות הזמנה מיוניקלו מראש", type: "inner" }
+  ];
+  save(SK.db, db);
+}
 
 let logSt=load(SK.log,{});
 let packSt=load(SK.pack,{});
 let pfSt=load(SK.pf,{});
-let custom=load(SK.cust,{pf:[],log:{},pack:{}});
 let curDay=load(SK.day,1);
 let expenses=load(SK.exps,null);
 if(expenses===null){expenses=[...D.knownExpenses];save(SK.exps,expenses);}
 
 /* ============================================================
-   CURRENCY
+   HELPER PATH UPDATER FOR CONTENTEDITABLE
+============================================================ */
+function updateDbPath(path, val) {
+  const parts = path.split('.');
+  let curr = db;
+  for(let i=0; i < parts.length - 1; i++) {
+    curr = curr[parts[i]];
+  }
+  curr[parts[parts.length - 1]] = val;
+  save(SK.db, db);
+  updateProgress();
+}
+
+/* ============================================================
+   CURRENCY CONVERTER (ZERO OVERHEAD, SELECT-ALL FIX)
 ============================================================ */
 const ILS_EUR=3.95,PLN_EUR=4.30;
 let curLock=false;
@@ -651,14 +826,57 @@ function initCur(){
   const fI=v=>{eu.value=(v/ILS_EUR).toFixed(2);pl.value=(v/ILS_EUR*PLN_EUR).toFixed(2);};
   const fE=v=>{il.value=(v*ILS_EUR).toFixed(2);pl.value=(v*PLN_EUR).toFixed(2);};
   const fP=v=>{eu.value=(v/PLN_EUR).toFixed(2);il.value=(v/PLN_EUR*ILS_EUR).toFixed(2);};
+  
   il.addEventListener('input',()=>{if(curLock)return;curLock=true;fI(+il.value||0);curLock=false;});
   eu.addEventListener('input',()=>{if(curLock)return;curLock=true;fE(+eu.value||0);curLock=false;});
   pl.addEventListener('input',()=>{if(curLock)return;curLock=true;fP(+pl.value||0);curLock=false;});
+
+  // Mask & force select-all on click/touch cleanly (no background tint)
+  [il,eu,pl].forEach(inp => {
+    let preventDeselection = false;
+
+    inp.addEventListener('focus', () => {
+      preventDeselection = true;
+      setTimeout(() => {
+        inp.select();
+        try { inp.setSelectionRange(0, 9999); } catch(e) {}
+      }, 50);
+    });
+
+    inp.addEventListener('mousedown', () => {
+      if (document.activeElement === inp) return;
+      preventDeselection = true;
+    });
+
+    inp.addEventListener('mouseup', (e) => {
+      if (preventDeselection) {
+        e.preventDefault();
+        preventDeselection = false;
+      }
+    });
+
+    inp.addEventListener('touchstart', () => {
+      if (document.activeElement === inp) return;
+      preventDeselection = true;
+    });
+
+    inp.addEventListener('touchend', (e) => {
+      if (preventDeselection) {
+        inp.focus();
+        setTimeout(() => {
+          inp.select();
+          try { inp.setSelectionRange(0, 9999); } catch(err) {}
+        }, 50);
+        preventDeselection = false;
+      }
+    });
+  });
+
   fI(100);
 }
 
 /* ============================================================
-   EXPENSES
+   EXPENSES TRACKING
 ============================================================ */
 document.getElementById('add-exp-btn').addEventListener('click',()=>{
   const f=document.getElementById('exp-form');
@@ -703,75 +921,207 @@ function renderExps(){
 }
 
 /* ============================================================
-   CHECKBOX SYSTEM
+   UNIVERSAL DIRECT EDITABLE CHECKBOX COMPONENT
 ============================================================ */
 const TICK=`<svg class="tk" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const uid=p=>`${p}${Date.now()}${Math.floor(Math.random()*999)}`;
 
-function makeRow(id,text,checked,stObj,stKey,canDel,onDel){
-  const row=document.createElement('div');
-  row.style.cssText='display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--line2);';
+function makeRow(id, text, checked, stObj, stKey, onDel, onRename) {
+  const row = document.createElement('div');
+  row.className = 'flex items-start gap-3 py-2.5 border-b border-gray-200/60 group relative';
 
-  const box=document.createElement('button');
-  box.className='chk'+(checked?' on':'');
-  box.innerHTML=TICK;
+  const box = document.createElement('button');
+  box.className = 'chk' + (checked ? ' on' : '');
+  box.innerHTML = TICK;
 
-  const lbl=document.createElement('span');
-  lbl.style.cssText='flex:1;font-size:15px;line-height:1.5;padding-top:1px;';
-  lbl.textContent=text;
-  if(checked)lbl.classList.add('strike');
+  const lbl = document.createElement('span');
+  lbl.className = 'flex-1 text-[15px] leading-tight pt-0.5 ' + (checked ? 'strike' : '');
+  lbl.textContent = text;
 
-  box.addEventListener('click',()=>{
-    const on=!box.classList.contains('on');
-    box.classList.toggle('on',on);
-    lbl.classList.toggle('strike',on);
-    stObj[id]=on;
-    save(stKey,stObj);
+  box.addEventListener('click', () => {
+    const on = !box.classList.contains('on');
+    box.classList.toggle('on', on);
+    lbl.classList.toggle('strike', on);
+    stObj[id] = on;
+    save(stKey, stObj);
     updateProgress();
   });
 
   row.appendChild(box);
   row.appendChild(lbl);
-  if(canDel){
-    const d=document.createElement('button');
-    d.className='del';d.textContent='✕';d.title='מחק';
-    d.addEventListener('click',()=>onDel(id));
-    row.appendChild(d);
-  }
+
+  // In-line actions for Edit Mode
+  const actions = document.createElement('div');
+  actions.className = 'edit-indicator items-center gap-1 absolute left-2 top-2 bg-white/90 pl-1 rounded hidden';
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'text-amber-600 hover:text-amber-700 p-1 rounded hover:bg-amber-50';
+  editBtn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+    </svg>
+  `;
+  editBtn.addEventListener('click', () => {
+    const orig = lbl.textContent;
+    lbl.setAttribute('contenteditable', 'true');
+    lbl.focus();
+    
+    // Select all text natively
+    const range = document.createRange();
+    range.selectNodeContents(lbl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const doneEdit = () => {
+      lbl.removeAttribute('contenteditable');
+      const val = lbl.textContent.trim();
+      if (val && val !== orig) {
+        onRename(id, val);
+      } else {
+        lbl.textContent = orig;
+      }
+    };
+
+    lbl.addEventListener('blur', doneEdit, { once: true });
+    lbl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        lbl.blur();
+      }
+    });
+  });
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'text-red-500 hover:text-red-600 p-1 rounded hover:bg-red-50 font-bold text-xs px-1.5';
+  delBtn.innerHTML = '✕';
+  delBtn.addEventListener('click', () => {
+    showConfirm('מחיקת פריט', `האם למחוק את "${text}"?`, () => {
+      onDel(id);
+    });
+  });
+
+  actions.appendChild(editBtn);
+  actions.appendChild(delBtn);
+  row.appendChild(actions);
+
   return row;
 }
 
-function renderList({cont,base,cust,stObj,stKey,addId,btnId,onAdd,onDel}){
-  cont.innerHTML='';
-  const all=[...base,...cust];
-  all.forEach((item,i)=>{
-    const row=makeRow(item.id,item.t,!!stObj[item.id],stObj,stKey,i>=base.length,onDel);
-    if(i===all.length-1)row.style.borderBottom='none';
+function renderList({ cont, items, onRename, onDel, stObj, stKey, addId, btnId, onAdd }) {
+  cont.innerHTML = '';
+  items.forEach((item, i) => {
+    const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, stKey, onDel, onRename);
+    if (i === items.length - 1) row.style.borderBottom = 'none';
     cont.appendChild(row);
   });
-  if(addId){
-    const inp=document.getElementById(addId),btn=document.getElementById(btnId);
-    if(inp&&btn){
-      btn.onclick=()=>{const t=inp.value.trim();if(!t)return;onAdd(t);inp.value='';};
-      inp.onkeydown=e=>{if(e.key==='Enter')btn.click();};
+  if (addId) {
+    const inp = document.getElementById(addId), btn = document.getElementById(btnId);
+    if (inp && btn) {
+      btn.onclick = () => {
+        const t = inp.value.trim();
+        if (!t) return;
+        onAdd(t);
+        inp.value = '';
+      };
+      inp.onkeydown = e => { if (e.key === 'Enter') btn.click(); };
     }
   }
 }
 
 /* ============================================================
-   HOME
+   GLOBAL DIRECT EDIT IMPLEMENTATION & FIELD ATTRIBUTES
+============================================================ */
+let globalEditMode = false;
+
+function setEditable(el, field) {
+  if (!el) return;
+  el.setAttribute('data-editable-field', field);
+  if (globalEditMode) {
+    el.setAttribute('contenteditable', 'true');
+    el.setAttribute('spellcheck', 'false');
+  } else {
+    el.removeAttribute('contenteditable');
+  }
+}
+
+function toggleGlobalEdit() {
+  globalEditMode = !globalEditMode;
+  const btn = document.getElementById('global-edit-btn');
+  const txt = document.getElementById('global-edit-text');
+  
+  if (globalEditMode) {
+    document.body.classList.add('global-edit-active');
+    btn.classList.remove('bg-amber-600');
+    btn.classList.add('bg-green-600');
+    txt.textContent = "סיום עריכה ✓";
+  } else {
+    document.body.classList.remove('global-edit-active');
+    btn.classList.remove('bg-green-600');
+    btn.classList.add('bg-amber-600');
+    txt.textContent = "עריכת עמוד";
+  }
+  
+  // Re-enable/disable all dynamic direct edits in memory
+  setEditable(document.getElementById('site-title'), "title");
+  setEditable(document.getElementById('site-subtitle'), "subtitle");
+  
+  renderHome();
+  renderItinerary();
+  renderPF();
+  renderPacking();
+  renderLogistics();
+  renderTips();
+}
+
+document.getElementById('global-edit-btn').addEventListener('click', toggleGlobalEdit);
+
+// Global Auto-save blur listener
+document.addEventListener('blur', (e) => {
+  const f = e.target.getAttribute('data-editable-field');
+  if (f) {
+    const val = e.target.innerText.trim();
+    updateDbPath(f, val);
+  }
+}, true);
+
+// Prevent carriage-returns in single-line targets
+document.addEventListener('keydown', (e) => {
+  const f = e.target.getAttribute('data-editable-field');
+  if (f && e.key === 'Enter') {
+    if (!f.includes('notes') && !f.includes('tip') && !f.includes('warn') && !f.includes('desc')) {
+      e.preventDefault();
+      e.target.blur();
+    }
+  }
+});
+
+/* ============================================================
+   HOME MODULE
 ============================================================ */
 function renderHome(){
-  const day=D.days.find(d=>d.n===curDay);
-  document.getElementById('home-title').textContent=`יום ${day.n} — ${day.heTitle}`;
-  document.getElementById('home-sub').textContent=day.enTitle||day.hike||'';
+  const day = db.days.find(d=>d.n===curDay);
+  
+  const titleEl = document.getElementById('home-title');
+  titleEl.textContent = `יום ${day.n} — ${day.heTitle}`;
+  setEditable(titleEl, `days.${curDay-1}.heTitle`);
+
+  const subEl = document.getElementById('home-sub');
+  subEl.textContent = day.enTitle || day.hike || '';
+  setEditable(subEl, `days.${curDay-1}.enTitle`);
+
+  const dateEl = document.getElementById('home-date');
+  if (dateEl) {
+    dateEl.textContent = day.date || '';
+    setEditable(dateEl, `days.${curDay-1}.date`);
+  }
+
   document.getElementById('home-daynum').textContent=String(day.n).padStart(2,'0');
   document.getElementById('hdr-day').textContent=`יום ${day.n}/9`;
-  const dateEl=document.getElementById('home-date');
-  if(dateEl) dateEl.textContent=day.date||'';
 
-  // countdown
-  const tripStart=new Date('2026-09-03T00:00:00');
+  // Countdown clock
+  const tripStart=new Date('2026-09-01T00:00:00');
   const now=new Date();
   const diffMs=tripStart-now;
   const cdEl=document.getElementById('home-countdown');
@@ -788,28 +1138,29 @@ function renderHome(){
     cdSub.textContent='הטיול הסתיים';
   }
 
-  // שבועות
   const weeksEl=document.getElementById('home-countdown-weeks');
   if(weeksEl){
     weeksEl.textContent = diffMs>0 ? Math.floor(diffMs/(1000*60*60*24*7)) : (diffMs>-(9*24*60*60*1000)?'🏔️':'✓');
   }
 
-  // סה"כ ק"מ
-  const totalKm=D.days.reduce((s,d)=>s+(d.kmFoot||0),0);
+  // Calculate sum of feet walking dynamically
+  const totalKm=db.days.reduce((s,d)=>s+(d.kmFoot||0),0);
   document.getElementById('home-total-km').textContent=totalKm.toFixed(1);
 
   const linaWrap=document.getElementById('home-lina');
+  const linaText = document.getElementById('home-lina-text');
   if(day.bed){
     linaWrap.style.display='flex';
-    document.getElementById('home-lina-text').textContent=day.bed;
+    linaText.textContent=day.bed;
+    setEditable(linaText, `days.${curDay-1}.bed`);
   } else {
     linaWrap.style.display='none';
   }
 
-  // day chips
+  // Day Strip Selection Cards
   const strip=document.getElementById('day-strip');
   strip.innerHTML='';
-  D.days.forEach(d=>{
+  db.days.forEach(d=>{
     const a=d.n===curDay;
     const chip=document.createElement('button');
     chip.className='day-chip'+(a?' active':'');
@@ -818,22 +1169,24 @@ function renderHome(){
     strip.appendChild(chip);
   });
 
-  const uw=D.days.find(d=>d.warn&&d.n>=curDay);
-  if(uw)document.getElementById('home-warn-text').textContent=`יום ${uw.n}: ${uw.warn}`;
+  const uw=db.days.find(d=>d.warn&&d.n>=curDay);
+  if(uw) {
+    document.getElementById('home-warn-text').textContent=`יום ${uw.n}: ${uw.warn}`;
+  }
 }
 
 function shortName(d){
-  const names={1:"נחיתה",2:"Suchá Belá",3:"Piecky",4:"Lomnický štít",5:"Javorová",6:"Kasprowy",7:"Morskie Oko",8:"ספא",9:"טיסה"};
+  const names={1:"נחיתה",2:"Suchá Belá",3:"Piecky",4:"Lomnický",5:"Javorová",6:"Kasprowy",7:"Morskie Oko",8:"ספא",9:"טיסה"};
   return names[d.n]||`יום ${d.n}`;
 }
 
 /* ============================================================
-   ITINERARY
+   ITINERARY MODULE (WITH IN-LINE CONFIGURATORS)
 ============================================================ */
 function renderItinerary(){
   const list=document.getElementById('itin-list');
   list.innerHTML='';
-  D.days.forEach((day,idx)=>{
+  db.days.forEach((day,idx)=>{
     const dk=`d${day.n}`;
     const pills=[];
     if(day.kmFoot)  pills.push(`<span class="spill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 12C6 5 9 19 12 12C15 5 18 16 21 12" stroke="var(--green)" stroke-width="2.2" stroke-linecap="round"/></svg>${day.kmFoot} ק"מ ברגל</span>`);
@@ -852,31 +1205,44 @@ function renderItinerary(){
         <div style="display:flex;align-items:center;gap:14px;min-width:0;">
           <span class="fm font-bold" style="font-size:22px;color:var(--amber);flex-shrink:0;">${String(day.n).padStart(2,'0')}</span>
           <div style="min-width:0;">
-            <h3 class="ft font-bold" style="font-size:18px;color:var(--ink);margin:0;" data-editable>${day.heTitle}</h3>
-            ${day.enTitle?`<p style="font-size:15px;color:var(--ink2);margin:3px 0 0;font-weight:500;" data-editable>${day.enTitle}</p>`:''}
-            ${day.date?`<p style="font-size:14px;color:var(--ink2);margin:4px 0 0;font-weight:600;">${day.date}</p>`:''}
-            ${day.bed?`<div style="display:flex;align-items:center;gap:5px;margin-top:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 22V8L12 2L21 8V22H15V16H9V22H3Z" stroke="var(--amber)" stroke-width="1.8" stroke-linejoin="round"/></svg><span style="font-size:14px;font-weight:700;color:var(--ink);" data-editable>${day.bed}</span></div>`:''}
+            <h3 class="ft font-bold text-lg text-gray-900" id="it-title-${idx}">${day.heTitle}</h3>
+            <p class="text-sm font-medium text-gray-500 mt-0.5" id="it-sub-${idx}"></p>
+            <p class="text-xs font-semibold text-gray-400 mt-0.5" id="it-date-${idx}"></p>
+            <div id="it-bed-row-${idx}" class="flex items-center gap-1 mt-1 text-sm font-bold text-gray-700">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 22V8L12 2L21 8V22H15V16H9V22H3Z" stroke="var(--amber)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              <span id="it-bed-${idx}"></span>
+            </div>
           </div>
         </div>
         <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;transition:transform .2s;"><path d="M6 9l6 6 6-6" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </summary>
       <div style="padding:0 18px 18px;border-top:0.5px solid var(--line2);">
-        <div style="display:flex;justify-content:flex-end;margin-top:12px;margin-bottom:10px;">
-          <button class="edit-btn" onclick="toggleEdit(this, this.closest('details'))">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            עריכה
+        <div class="flex gap-2 flex-wrap mb-3 mt-3">
+          <button class="edit-indicator bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-amber-200" onclick="editDayNumericParams(${idx})">
+            ⚙️ הגדרת נתוני מסלול
           </button>
         </div>
-        ${pills.length?`<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;">${pills.join('')}</div>`:''}
-        ${day.hike?`<p style="font-size:14px;color:var(--ink2);margin:0 0 12px;font-style:italic;" data-editable>${day.hike}</p>`:''}
-        ${day.notes?`<p style="font-size:15px;line-height:1.7;color:var(--ink2);margin:0 0 12px;white-space:pre-line;" data-editable>${day.notes}</p>`:''}
-        ${day.warn?`<div class="warn" style="margin-bottom:12px;"><p style="font-size:13px;font-weight:700;color:#7A4010;margin:0 0 4px;">⚠ שים לב</p><p style="font-size:15px;color:#5A2E08;margin:0;" data-editable>${day.warn}</p></div>`:''}
-        ${day.tip?`<div class="inner" style="margin-bottom:12px;background:#FDFAF3;border-color:#E8DEB8;"><p style="font-size:13px;font-weight:700;color:#5A4A10;margin:0 0 4px;">💡 טיפ</p><p style="font-size:15px;line-height:1.7;color:var(--ink2);margin:0;" data-editable>${day.tip}</p></div>`:''}
-        ${day.drive?`<div class="inner drive-row" style="margin-bottom:12px;">
-          <span class="dr-label">🚗 ${day.drive}</span>
-          <span class="dr-time">${day.driveTime}</span>
+        ${pills.length?`<div class="flex flex-wrap gap-1.5 mb-3">${pills.join('')}</div>`:''}
+        
+        <p class="text-sm font-semibold text-gray-800 mb-2 italic" id="it-hike-${idx}"></p>
+        <p class="text-[15px] leading-relaxed text-gray-700 mb-3 whitespace-pre-line" id="it-notes-${idx}"></p>
+        
+        <div class="warn mb-3" id="it-warn-box-${idx}">
+          <p style="font-size:13px;font-weight:700;color:#7A4010;margin:0 0 4px;">⚠ שים לב</p>
+          <p class="text-[15px] text-[#5A2E08] margin-0" id="it-warn-${idx}"></p>
+        </div>
+        
+        <div class="inner mb-3 bg-[#FDFAF3] border-color-[#E8DEB8]" id="it-tip-box-${idx}">
+          <p style="font-size:13px;font-weight:700;color:#5A4A10;margin:0 0 4px;">💡 טיפ</p>
+          <p class="text-[15px] text-gray-600 leading-relaxed margin-0" id="it-tip-${idx}"></p>
+        </div>
+
+        ${day.drive?`<div class="inner drive-row mb-3">
+          <span class="dr-label" id="it-dr-label-${idx}">🚗 ${day.drive}</span>
+          <span class="dr-time" id="it-dr-time-${idx}">${day.driveTime}</span>
         </div>`:''}
-        ${day.mapEmbed?`<div style="margin-bottom:12px;">
+
+        ${day.mapEmbed?`<div class="mb-3">
           <p style="font-size:12px;font-weight:700;color:var(--ink3);margin:0 0 6px;">🗺 מפת המסלול</p>
           <div style="border-radius:12px;overflow:hidden;border:0.5px solid var(--line);">
             <iframe src="${day.mapEmbed}" width="100%" height="300" style="border:none;display:block;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -885,116 +1251,470 @@ function renderItinerary(){
             <a href="https://www.google.com/maps/d/viewer?mid=1WVsFveqJhkEW8OEJvpw3I1Lm8ttsgBY" target="_blank" class="maplink" style="flex:1;min-width:140px;padding:10px 14px;font-size:14px;font-weight:600;">Google Maps ↗</a>
             ${day.mapEarth?`<a href="${day.mapEarth}" target="_blank" class="maplink" style="flex:1;min-width:140px;padding:10px 14px;font-size:14px;font-weight:600;">Google Earth ↗</a>`:''}
           </div>
-        </div>`:day.map?`<a href="${day.map}" target="_blank" class="maplink" style="display:flex;margin-bottom:12px;"><span style="font-size:15px;font-weight:600;">פתיחת מפת המסלול</span><span style="color:var(--amber);margin-right:auto;font-size:18px;"> ↗</span></a>`:''}
+        </div>`:day.map?`<a href="${day.map}" target="_blank" class="maplink mb-3" style="display:flex;"><span style="font-size:15px;font-weight:600;">פתיחת מפת המסלול</span><span style="color:var(--amber);margin-right:auto;font-size:18px;"> ↗</span></a>`:''}
+        
         <p style="font-size:12px;font-weight:700;color:var(--ink3);margin:0 0 6px;letter-spacing:.03em;">צ׳ק ליסט לוגיסטי</p>
         <div id="cl-${dk}"></div>
         <div class="add-row"><input type="text" id="ai-${dk}" placeholder="הוספת פריט…"><button id="ab-${dk}">הוסף</button></div>
       </div>`;
 
     list.appendChild(det);
+
+    // Apply Contenteditable configurations
+    setEditable(document.getElementById(`it-title-${idx}`), `days.${idx}.heTitle`);
+    
+    const sEl = document.getElementById(`it-sub-${idx}`);
+    sEl.textContent = day.enTitle || '';
+    setEditable(sEl, `days.${idx}.enTitle`);
+
+    const dEl = document.getElementById(`it-date-${idx}`);
+    dEl.textContent = day.date || '';
+    setEditable(dEl, `days.${idx}.date`);
+
+    const bEl = document.getElementById(`it-bed-${idx}`);
+    bEl.textContent = day.bed || '';
+    setEditable(bEl, `days.${idx}.bed`);
+    document.getElementById(`it-bed-row-${idx}`).style.display = day.bed ? 'flex' : 'none';
+
+    const hEl = document.getElementById(`it-hike-${idx}`);
+    hEl.textContent = day.hike || '';
+    setEditable(hEl, `days.${idx}.hike`);
+    hEl.style.display = day.hike ? 'block' : 'none';
+
+    const nEl = document.getElementById(`it-notes-${idx}`);
+    nEl.textContent = day.notes || '';
+    setEditable(nEl, `days.${idx}.notes`);
+
+    const wEl = document.getElementById(`it-warn-${idx}`);
+    wEl.textContent = day.warn || '';
+    setEditable(wEl, `days.${idx}.warn`);
+    document.getElementById(`it-warn-box-${idx}`).style.display = day.warn ? 'block' : 'none';
+
+    const tEl = document.getElementById(`it-tip-${idx}`);
+    tEl.textContent = day.tip || '';
+    setEditable(tEl, `days.${idx}.tip`);
+    document.getElementById(`it-tip-box-${idx}`).style.display = day.tip ? 'block' : 'none';
+
+    if (day.drive) {
+      setEditable(document.getElementById(`it-dr-label-${idx}`), `days.${idx}.drive`);
+      setEditable(document.getElementById(`it-dr-time-${idx}`), `days.${idx}.driveTime`);
+    }
+
     det.addEventListener('toggle',()=>{det.querySelector('.chev').style.transform=det.open?'rotate(180deg)':'';});
     if(det.open)det.querySelector('.chev').style.transform='rotate(180deg)';
 
+    // Render daily dynamic checks list
     renderList({
-      cont:document.getElementById(`cl-${dk}`),
-      base:day.checks,cust:custom.log[dk]||[],
-      stObj:logSt,stKey:SK.log,
-      addId:`ai-${dk}`,btnId:`ab-${dk}`,
-      onAdd:(t)=>{const id=uid(dk);if(!custom.log[dk])custom.log[dk]=[];custom.log[dk].push({id,t});save(SK.cust,custom);renderItinerary();},
-      onDel:(id)=>{custom.log[dk]=(custom.log[dk]||[]).filter(i=>i.id!==id);delete logSt[id];save(SK.cust,custom);save(SK.log,logSt);renderItinerary();}
+      cont: document.getElementById(`cl-${dk}`),
+      items: day.checks || [],
+      onRename: (itemId, txt) => {
+        const target = day.checks.find(c => c.id === itemId);
+        if (target) target.t = txt;
+        save(SK.db, db);
+        renderItinerary();
+      },
+      onDel: (itemId) => {
+        day.checks = day.checks.filter(c => c.id !== itemId);
+        delete logSt[itemId];
+        save(SK.db, db);
+        save(SK.log, logSt);
+        renderItinerary();
+      },
+      stObj: logSt,
+      stKey: SK.log,
+      addId: `ai-${dk}`,
+      btnId: `ab-${dk}`,
+      onAdd: (txt) => {
+        const id = uid(dk);
+        if(!day.checks) day.checks = [];
+        day.checks.push({ id, t: txt });
+        save(SK.db, db);
+        renderItinerary();
+      }
     });
   });
 }
 
 /* ============================================================
-   PRE-FLIGHT
+   NUMERIC STATS MODAL EDITOR FOR DAY
 ============================================================ */
-function addPF(){
-  const inp=document.getElementById('pf-inp'),t=inp.value.trim();
-  if(!t)return;const id=uid('pf');custom.pf.push({id,t});save(SK.cust,custom);inp.value='';renderPF();
+function editDayNumericParams(idx) {
+  const d = db.days[idx];
+  document.getElementById('edit-day-idx').value = idx;
+  document.getElementById('edit-day-km').value = d.kmFoot || '';
+  document.getElementById('edit-day-up').value = d.elevUp || '';
+  document.getElementById('edit-day-down').value = d.elevDown || '';
+  document.getElementById('edit-day-peak').value = d.peakM || '';
+  document.getElementById('edit-day-dur').value = d.dur || '';
+  document.getElementById('day-stats-modal').style.display = 'flex';
 }
+function closeDayStatsModal() {
+  document.getElementById('day-stats-modal').style.display = 'none';
+}
+function saveDayStats() {
+  const idx = parseInt(document.getElementById('edit-day-idx').value);
+  const d = db.days[idx];
+  d.kmFoot = parseFloat(document.getElementById('edit-day-km').value) || null;
+  d.elevUp = parseInt(document.getElementById('edit-day-up').value) || null;
+  d.elevDown = parseInt(document.getElementById('edit-day-down').value) || null;
+  d.peakM = parseInt(document.getElementById('edit-day-peak').value) || null;
+  d.dur = document.getElementById('edit-day-dur').value.trim() || null;
+
+  save(SK.db, db);
+  closeDayStatsModal();
+  renderHome();
+  renderItinerary();
+}
+
+/* ============================================================
+   PRE-FLIGHT MODULE
+============================================================ */
 function renderPF(){
   renderList({
     cont:document.getElementById('pf-list'),
-    base:D.preflight,cust:custom.pf,
-    stObj:pfSt,stKey:SK.pf,
-    addId:null,btnId:null,onAdd:()=>{},
-    onDel:(id)=>{custom.pf=custom.pf.filter(i=>i.id!==id);delete pfSt[id];save(SK.cust,custom);save(SK.pf,pfSt);renderPF();}
+    items: db.preflight || [],
+    onRename: (id, text) => {
+      const target = db.preflight.find(i=>i.id===id);
+      if(target) target.t = text;
+      save(SK.db, db);
+      renderPF();
+    },
+    onDel: (id) => {
+      db.preflight = db.preflight.filter(i=>i.id!==id);
+      delete pfSt[id];
+      save(SK.db, db);
+      save(SK.pf, pfSt);
+      renderPF();
+    },
+    stObj: pfSt,
+    stKey: SK.pf,
+    addId: null,
+    btnId: null,
+    onAdd: () => {}
   });
+
+  // Apply static text bindings to pre-flight add row
+  const inp = document.getElementById('pf-inp');
+  const btn = document.getElementById('pf-add-btn');
+  if(inp && btn) {
+    btn.onclick = () => {
+      const val = inp.value.trim();
+      if(!val) return;
+      const id = uid('pf');
+      db.preflight.push({ id, t: val });
+      save(SK.db, db);
+      inp.value = '';
+      renderPF();
+    };
+    inp.onkeydown = e => { if (e.key === 'Enter') btn.click(); };
+  }
+
   updateProgress();
 }
 
 /* ============================================================
-   PACKING
+   DYNAMIC DYNAMIC DYNAMIC DYNAMIC USEFUL TIPS MODULE
 ============================================================ */
-const pk=(c,t)=>`${c}::${t}`;
-function renderPacking(){
-  const wrap=document.getElementById('pack-cats');
-  wrap.innerHTML='';
-  let ci=0;
-  Object.entries(D.packing).forEach(([cat,items])=>{
-    const base=items.map(t=>({id:pk(cat,t),t}));
-    const cust=custom.pack[cat]||[];
-    const all=[...base,...cust];
-    const done=all.filter(i=>packSt[i.id]).length;
-    const sc=`pc${ci++}`;
-    const card=document.createElement('div');
-    card.className='card';
-    card.style='margin-bottom:16px;';
-    card.innerHTML=`
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h3 class="ft font-bold" style="font-size:19px;margin:0;">${cat}</h3>
-        <span style="font-size:13px;color:var(--ink3);">${done}/${all.length}</span>
+function renderTips() {
+  const cont = document.getElementById('useful-tips-list');
+  if (!cont) return;
+  cont.innerHTML = '';
+  
+  db.tips.forEach((tip, idx) => {
+    const tipDiv = document.createElement('div');
+    if (tip.type === 'info') {
+      tipDiv.className = 'info relative group p-4 space-y-1';
+      tipDiv.style.background = 'var(--blue2)';
+      tipDiv.style.borderColor = '#B8D4EA';
+    } else {
+      tipDiv.className = 'inner relative group space-y-1';
+    }
+    
+    tipDiv.innerHTML = `
+      <div class="flex items-center justify-between mb-1">
+        <p class="text-[14px] font-bold" style="color: ${tip.type === 'info' ? '#1A4E70' : 'var(--ink)'};" id="tip-t-${idx}">${tip.title}</p>
+        <div class="edit-indicator hidden items-center gap-1">
+          <button class="text-red-500 hover:text-red-700 text-xs font-bold bg-white/50 px-2 py-1 rounded" onclick="deleteUsefulTip(${idx})">מחק טיפ ✕</button>
+        </div>
       </div>
-      <div id="${sc}-b"></div>
-      <div class="add-row"><input type="text" id="${sc}-i" placeholder="הוספת פריט…"><button id="${sc}-btn">הוסף</button></div>`;
-    wrap.appendChild(card);
-    renderList({
-      cont:document.getElementById(`${sc}-b`),
-      base,cust,stObj:packSt,stKey:SK.pack,
-      addId:`${sc}-i`,btnId:`${sc}-btn`,
-      onAdd:(t)=>{const id=uid('pk');if(!custom.pack[cat])custom.pack[cat]=[];custom.pack[cat].push({id,t});save(SK.cust,custom);renderPacking();},
-      onDel:(id)=>{custom.pack[cat]=(custom.pack[cat]||[]).filter(i=>i.id!==id);delete packSt[id];save(SK.cust,custom);save(SK.pack,packSt);renderPacking();}
-    });
+      <p class="text-[14px] leading-relaxed whitespace-pre-line" style="color: ${tip.type === 'info' ? '#1A3A55' : 'var(--ink2)'};" id="tip-d-${idx}">${tip.desc}</p>
+    `;
+    
+    cont.appendChild(tipDiv);
+    
+    setEditable(document.getElementById(`tip-t-${idx}`), `tips.${idx}.title`);
+    setEditable(document.getElementById(`tip-d-${idx}`), `tips.${idx}.desc`);
+  });
+  
+  // Show/hide add tip panel based on edit mode
+  const addControl = document.getElementById('add-tip-control');
+  if (addControl) {
+    if (globalEditMode) {
+      addControl.classList.remove('hidden');
+      addControl.classList.add('flex');
+    } else {
+      addControl.classList.remove('flex');
+      addControl.classList.add('hidden');
+    }
+  }
+}
+
+function addUsefulTip() {
+  const title = document.getElementById('new-tip-title').value.trim();
+  const desc = document.getElementById('new-tip-desc').value.trim();
+  if (!title || !desc) return;
+  
+  if (!db.tips) db.tips = [];
+  db.tips.push({
+    id: `tip_${Date.now()}`,
+    title: title,
+    desc: desc,
+    type: "inner"
+  });
+  save(SK.db, db);
+  
+  document.getElementById('new-tip-title').value = '';
+  document.getElementById('new-tip-desc').value = '';
+  renderTips();
+}
+
+function deleteUsefulTip(idx) {
+  showConfirm('מחיקת טיפ שימושי', 'האם למחוק טיפ זה לצמיתות?', () => {
+    db.tips.splice(idx, 1);
+    save(SK.db, db);
+    renderTips();
   });
 }
 
 /* ============================================================
-   LOGISTICS
+   PACKING LISTS MODULE
+============================================================ */
+function renderPacking(){
+  const wrap=document.getElementById('pack-cats');
+  wrap.innerHTML='';
+  let ci=0;
+
+  // Render a Category creation card when in global edit mode
+  if (globalEditMode) {
+    const addCatDiv = document.createElement('div');
+    addCatDiv.className = 'card border-dashed border-2 border-amber-400 bg-amber-50/20 mb-4 p-4 text-center';
+    addCatDiv.innerHTML = `
+      <p class="text-sm font-bold text-amber-800 mb-2">➕ הוספת קטגוריית ציוד חדשה</p>
+      <div class="flex gap-2">
+        <input type="text" id="new-cat-name" placeholder="שם הקטגוריה (לדוגמה: בישול שטח)" class="flex-1 px-3 py-2 border rounded-lg text-sm bg-white">
+        <button onclick="addPackingCategory()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-lg text-sm">הוסף</button>
+      </div>
+    `;
+    wrap.appendChild(addCatDiv);
+  }
+
+  Object.entries(db.packing).forEach(([cat, items])=>{
+    const done=items.filter(i=>packSt[i.id]).length;
+    const sc=`pc${ci++}`;
+    const card=document.createElement('div');
+    card.className='card mb-4 relative';
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="flex items-center gap-2">
+          <h3 class="ft font-bold text-lg" data-editable-cat="${cat}">${cat}</h3>
+          <button class="edit-indicator text-red-500 hover:text-red-700 text-xs hidden" onclick="deletePackingCategory('${cat}')">🗑️ מחק קטגוריה</button>
+        </div>
+        <span style="font-size:13px;color:var(--ink3);">${done}/${items.length}</span>
+      </div>
+      <div id="${sc}-b"></div>
+      <div class="add-row"><input type="text" id="${sc}-i" placeholder="הוספת פריט…"><button id="${sc}-btn">הוסף</button></div>`;
+    wrap.appendChild(card);
+
+    // Make category title editable on blur
+    const catH3 = card.querySelector('[data-editable-cat]');
+    if (globalEditMode) {
+      catH3.setAttribute('contenteditable', 'true');
+      catH3.setAttribute('spellcheck', 'false');
+    }
+
+    renderList({
+      cont:document.getElementById(`${sc}-b`),
+      items: items,
+      onRename: (id, text) => {
+        const target = items.find(i=>i.id===id);
+        if(target) target.t = text;
+        save(SK.db, db);
+        renderPacking();
+      },
+      onDel: (id) => {
+        db.packing[cat] = items.filter(i=>i.id!==id);
+        delete packSt[id];
+        save(SK.db, db);
+        save(SK.pack, packSt);
+        renderPacking();
+      },
+      stObj: packSt,
+      stKey: SK.pack,
+      addId:`${sc}-i`,
+      btnId:`${sc}-btn`,
+      onAdd:(t)=>{
+        const id=uid('pk');
+        db.packing[cat].push({id, t});
+        save(SK.db, db);
+        renderPacking();
+      }
+    });
+  });
+}
+
+// Rename Category Logic
+document.addEventListener('blur', (e) => {
+  const cat = e.target.getAttribute('data-editable-cat');
+  if (cat) {
+    const next = e.target.innerText.trim();
+    if (next && next !== cat) {
+      if (db.packing[next]) {
+        e.target.innerText = cat;
+        return;
+      }
+      db.packing[next] = db.packing[cat];
+      delete db.packing[cat];
+      save(SK.db, db);
+      renderPacking();
+    }
+  }
+}, true);
+
+function addPackingCategory() {
+  const inp = document.getElementById('new-cat-name');
+  const name = inp.value.trim();
+  if(!name) return;
+  if(db.packing[name]) return;
+  db.packing[name] = [];
+  save(SK.db, db);
+  renderPacking();
+}
+
+function deletePackingCategory(cat) {
+  showConfirm('מחיקת קטגוריה', `האם למחוק את הקטגוריה "${cat}" ואת כל הפריטים בה?`, () => {
+    db.packing[cat].forEach(i => delete packSt[i.id]);
+    delete db.packing[cat];
+    save(SK.db, db);
+    save(SK.pack, packSt);
+    renderPacking();
+  });
+}
+
+/* ============================================================
+   LOGISTICS MODULE (EMERGENCY & TRAVELS EDITOR)
 ============================================================ */
 function renderLogistics(){
-  document.getElementById('emg-list').innerHTML=D.emergency.map(e=>`
-    <div class="inner" style="padding:12px 14px;">
-      <p style="font-size:12px;color:var(--ink3);margin:0;">${e.l}</p>
-      <p class="fm font-bold" style="font-size:18px;margin:3px 0 0;direction:ltr;text-align:left;">${e.v}</p>
-    </div>`).join('');
+  // Emergency Panel
+  const emgCont = document.getElementById('emg-list');
+  emgCont.innerHTML = db.emergency.map((e, idx) => `
+    <div class="inner relative group" style="padding:12px 14px;">
+      <div class="flex items-center justify-between">
+        <p style="font-size:12px;color:var(--ink3);margin:0;" id="emg-l-${idx}">${e.l}</p>
+        <button class="edit-indicator text-red-500 hover:text-red-700 text-xs hidden absolute left-2 top-2 font-bold" onclick="deleteEmergency(${idx})">✕</button>
+      </div>
+      <p class="fm font-bold" style="font-size:18px;margin:3px 0 0;direction:ltr;text-align:left;" id="emg-v-${idx}">${e.v}</p>
+    </div>
+  `).join('');
 
-  document.getElementById('travel-list').innerHTML=D.travels.map(r=>`
-    <div class="inner drive-row">
-      <span class="dr-label">${r.r}</span>
-      <span class="dr-time">${r.t}</span>
-    </div>`).join('');
+  db.emergency.forEach((e, idx) => {
+    setEditable(document.getElementById(`emg-l-${idx}`), `emergency.${idx}.l`);
+    setEditable(document.getElementById(`emg-v-${idx}`), `emergency.${idx}.v`);
+  });
+
+  if (globalEditMode) {
+    const addEmg = document.createElement('div');
+    addEmg.className = 'inner border-dashed border border-amber-400 bg-amber-50/20 flex flex-col gap-2';
+    addEmg.innerHTML = `
+      <p class="text-xs font-bold text-amber-800">➕ הוספת איש קשר לחירום</p>
+      <input type="text" id="new-emg-l" placeholder="שם (לדוגמה: משטרה מקומית)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
+      <input type="text" id="new-emg-v" placeholder="מספר טלפון" class="px-2 py-1 border rounded text-xs text-left fm bg-white text-gray-800">
+      <button onclick="addEmergency()" class="bg-amber-600 text-white font-bold py-1 rounded text-xs">שמור</button>
+    `;
+    emgCont.appendChild(addEmg);
+  }
+
+  // Travels Panel
+  const travelCont = document.getElementById('travel-list');
+  travelCont.innerHTML = db.travels.map((r, idx) => `
+    <div class="inner drive-row relative group">
+      <div class="flex items-center justify-between">
+        <span class="dr-label" id="tr-r-${idx}">${r.r}</span>
+        <button class="edit-indicator text-red-500 hover:text-red-700 text-xs hidden absolute left-2 top-2 font-bold" onclick="deleteTravel(${idx})">✕</button>
+      </div>
+      <span class="dr-time" id="tr-t-${idx}">${r.t}</span>
+    </div>
+  `).join('');
+
+  db.travels.forEach((r, idx) => {
+    setEditable(document.getElementById(`tr-r-${idx}`), `travels.${idx}.r`);
+    setEditable(document.getElementById(`tr-t-${idx}`), `travels.${idx}.t`);
+  });
+
+  if (globalEditMode) {
+    const addTravel = document.createElement('div');
+    addTravel.className = 'inner border-dashed border border-amber-400 bg-amber-50/20 flex flex-col gap-2';
+    addTravel.innerHTML = `
+      <p class="text-xs font-bold text-amber-800">➕ הוספת זמני נסיעה</p>
+      <input type="text" id="new-tr-r" placeholder="מסלול (לדוגמה: קרקוב ← זאקופנה)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
+      <input type="text" id="new-tr-t" placeholder="זמן וק\"מ (לדוגמה: ~2 שעות · 110 ק\"מ)" class="px-2 py-1 border rounded text-xs bg-white text-gray-800">
+      <button onclick="addTravel()" class="bg-amber-600 text-white font-bold py-1 rounded text-xs">שמור</button>
+    `;
+    travelCont.appendChild(addTravel);
+  }
 
   const ta=document.getElementById('gen-notes');
   ta.value=load(SK.notes,'');
   ta.addEventListener('input',()=>save(SK.notes,ta.value));
 }
 
+function addEmergency() {
+  const l = document.getElementById('new-emg-l').value.trim();
+  const v = document.getElementById('new-emg-v').value.trim();
+  if(!l || !v) return;
+  db.emergency.push({ l, v });
+  save(SK.db, db);
+  renderLogistics();
+}
+function deleteEmergency(idx) {
+  showConfirm('מחיקת איש קשר', 'האם למחוק איש קשר זה?', () => {
+    db.emergency.splice(idx, 1);
+    save(SK.db, db);
+    renderLogistics();
+  });
+}
+function addTravel() {
+  const r = document.getElementById('new-tr-r').value.trim();
+  const t = document.getElementById('new-tr-t').value.trim();
+  if(!r || !t) return;
+  db.travels.push({ r, t });
+  save(SK.db, db);
+  renderLogistics();
+}
+function deleteTravel(idx) {
+  showConfirm('מחיקת מסלול נסיעה', 'האם למחוק נתוני נסיעה אלו?', () => {
+    db.travels.splice(idx, 1);
+    save(SK.db, db);
+    renderLogistics();
+  });
+}
+
 /* ============================================================
-   PROGRESS
+   PROGRESS & METRIC CONTROLLER
 ============================================================ */
 function updateProgress(){
-  const allP=Object.entries(D.packing).flatMap(([c,it])=>it.map(t=>pk(c,t)));
-  const custP=Object.values(custom.pack).flat().map(i=>i.id);
-  const pTot=allP.length+custP.length;
-  const pDone=[...allP,...custP].filter(id=>packSt[id]).length;
+  let pTot=0, pDone=0;
+  Object.values(db.packing).forEach(items=>{
+    pTot += items.length;
+    pDone += items.filter(i=>packSt[i.id]).length;
+  });
+  
   const pPct=pTot?Math.round(pDone/pTot*100):0;
   ['home-pack-pct','pack-pct'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=pPct+'%';});
   ['home-pack-bar','pack-bar'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.width=pPct+'%';});
   const pd=document.getElementById('pack-done');if(pd)pd.textContent=pDone;
   const pt=document.getElementById('pack-total');if(pt)pt.textContent=pTot;
 
-  const pfAll=[...D.preflight,...custom.pf];
+  const pfAll=db.preflight || [];
   const pfDone=pfAll.filter(i=>pfSt[i.id]).length;
   const pfPct=pfAll.length?Math.round(pfDone/pfAll.length*100):0;
   const pfb=document.getElementById('pf-bar');if(pfb)pfb.style.width=pfPct+'%';
@@ -1004,32 +1724,28 @@ function updateProgress(){
 }
 
 /* ============================================================
-   EDIT MODE — כפתור עריכה בכל כרטיס מסלול
+   CUSTOMsleek POPUP OVERLAYS (NO ALERTS BARS)
 ============================================================ */
-let editMode=false;
-function toggleEdit(btn,cardEl){
-  editMode=!editMode;
-  if(editMode){
-    cardEl.classList.add('edit-mode');
-    cardEl.querySelectorAll('[data-editable]').forEach(el=>{
-      el.setAttribute('contenteditable','true');
-      el.setAttribute('spellcheck','false');
-    });
-    btn.classList.add('active');
-    btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> סיום עריכה`;
-  } else {
-    cardEl.classList.remove('edit-mode');
-    cardEl.querySelectorAll('[data-editable]').forEach(el=>{
-      el.removeAttribute('contenteditable');
-    });
-    btn.classList.remove('active');
-    btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> עריכה`;
-    editMode=false;
-  }
+let confirmAction = null;
+function showConfirm(title, msg, onConfirm) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('custom-confirm-modal').style.display = 'flex';
+  confirmAction = () => {
+    onConfirm();
+    closeConfirmModal();
+  };
 }
+function closeConfirmModal() {
+  document.getElementById('custom-confirm-modal').style.display = 'none';
+  confirmAction = null;
+}
+document.getElementById('confirm-btn-yes').addEventListener('click', () => {
+  if (confirmAction) confirmAction();
+});
 
 /* ============================================================
-   TABS
+   TAB ENGINE
 ============================================================ */
 function setTab(tab){
   document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
@@ -1045,21 +1761,32 @@ function setTab(tab){
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 
 /* ============================================================
-   INIT
+   INITIALIZATION
 ============================================================ */
 function init(){
+  // Core text bindings
+  const titleH1 = document.getElementById('site-title');
+  titleH1.textContent = db.title;
+  setEditable(titleH1, "title");
+
+  const subtitleP = document.getElementById('site-subtitle');
+  subtitleP.textContent = db.subtitle;
+  setEditable(subtitleP, "subtitle");
+
   initCur();
   renderHome();
   renderItinerary();
   renderPF();
   renderPacking();
   renderLogistics();
+  renderTips();
   renderExps();
   updateProgress();
   setTab('home');
 }
 init();
 </script>
+
 <!-- BIRTHDAY MODAL -->
 <div id="bday-modal" style="display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;">
   <div id="bday-backdrop" style="position:absolute;inset:0;background:#EDEAE0;opacity:0.92;" onclick="closeBday()"></div>
@@ -1076,12 +1803,13 @@ init();
 
 <script>
 /* ============================================================
-   BIRTHDAY MODAL + CONFETTI
+   BIRTHDAY MODAL + CONFETTI CONTROLS
 ============================================================ */
 const BDAY_KEY = 'tatra_bday_seen';
 let bdayOpened = false;
 
 function openBday(){
+  if (globalEditMode) return; // Prevent birthday modal during active page editing
   bdayOpened = true;
   sessionStorage.setItem(BDAY_KEY, '1');
   stopTitlePulse();
@@ -1126,13 +1854,9 @@ function stopTitlePulse(){
   if(el){ el.style.fontSize = '20px'; el.style.color = 'var(--ink)'; }
 }
 
-// מחיקת BDAY_KEY רק לצורך בדיקה — הסר שורה זו בגרסה הסופית
-// localStorage.removeItem(BDAY_KEY);
-
 setTimeout(() => { startTitlePulse(); }, 800);
 
-
-/* ---- confetti ---- */
+/* ---- confetti particles rendering engine ---- */
 let confettiAnimId = null;
 const COLORS = ['#C97B3C','#E8A855','#7A8B6F','#3D6E8F','#D4A843','#E86B3C','#7FBF6F','#5B8FBF'];
 
