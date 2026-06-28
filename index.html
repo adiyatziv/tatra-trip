@@ -424,7 +424,7 @@ body:not(.global-edit-active) .edit-indicator {
 </main>
 
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 nav-glass border-t" style="border-color:var(--line)">
-  <div class="grid grid-cols-5 max-w-4xl mx-auto" style="padding-bottom:env(safe-area-inset-bottom)">
+  <div class="grid grid-cols-5 max-w-4xl mx-auto" style="padding-bottom:env(safe-area-insetBottom)">
     <button data-tab="home" class="tab-mobile mob-act flex flex-col items-center gap-1 py-3">
       <svg class="mi" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12L12 3L21 12V20H15V14H9V20H3V12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       <span class="ml" style="font-size:10px">ראשי</span>
@@ -560,7 +560,7 @@ body:not(.global-edit-active) .edit-indicator {
         {id:"d2a",t:"חניה ב-Podlesok parking lot"},
         {id:"d2b",t:"להביא 14€ מזומן (6€ חניה + 4€ כניסה × 2)"}
       ],
-      notes:"קניון עם סולמות, שרשראות ומפלים. המסלול חד-כיווני — עלייה בקניון, ירידה בנתיב אחר.",
+      notes:"קניון WITH סולמות, שרשראות ומפלים. המסלול חד-כיווני — עלייה בקניון, ירידה בנתיב אחר.",
       map:"https://www.alltrails.com/trail/slovakia/kosice--3/okruh-sucha-bela", warn:null,
       drive:"Tatranská Lomnica → Podlesok",driveTime:"~35 דקות (28 ק\"מ)"
     },
@@ -656,10 +656,10 @@ body:not(.global-edit-active) .edit-indicator {
       drive:"Zakopane → Termy → קרקוב",driveTime:"~20 דק׳ + ~2 שעות"
     },
     {
-      n:9, date:"9.9 · יום רביעי", heTitle:"טיסה הביתה — 23:55", enTitle:null, hike:null, bed:null,
+      n:9, date:"9.9 · יוםעי", heTitle:"טיסה הביתה — 23:55", enTitle:null, hike:null, bed:null,
       kmFoot:null,elevUp:null,elevDown:null,peakM:null,dur:null,
       checks:[
-        {id:"d9a",t:"טיסה יוצאת 23:55 מקרקוב לישראל"},
+        {id:"d9a",t:"טיסה נוחלת בקרקוב 23:55"},
         {id:"d9b",t:"להגיע לשדה בשעה 21:30 לפחות"}
       ],
       notes:"הטיסה יוצאת ב-23:55 מקרקוב לישראל. להגיע לשדה בסביבות 21:30.",
@@ -716,7 +716,7 @@ body:not(.global-edit-active) .edit-indicator {
       "שמיכת מילוט","ליינר","כיסוי לתיק",
       "שאקלים + שאקלים לתליה",
       "ערכת תפירה וסיכות ביטחון",
-      "עזרהראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדים ליבלות, משחה לכוויות, כדורים: אדוויל, מיגרנה, קלבטן, בחילות, אלרגיה, אזיקונים, חוט)",
+      "עזרה ראשונה (פלסטרים, יוד, תחבושות, פינצטה, פדים ליבלות, משחה לכוויות, כדורים: אדוויל, מיגרנה, קלבטן, בחילות, אלרגיה, אזיקונים, חוט)",
       "שקית לטישו שטח",
       "שקיות לאוכל בכמה גדלים (דרכון תמיד בפנים)",
       "נייר טואלט",
@@ -803,7 +803,9 @@ body:not(.global-edit-active) .edit-indicator {
   const ILS_EUR=3.95,PLN_EUR=4.30;
   let curLock=false;
   function initCur(){
-    const il=document.getElementById('c-ils'),eu=document.getElementById('c-eur'),pl=document.getElementById('c-pln');
+    const il=document.getElementById('c-ils');
+    const eu=document.getElementById('c-eur');
+    const pl=document.getElementById('c-pln');
     if(!il || !eu || !pl) return;
     const fI=v=>{eu.value=(v/ILS_EUR).toFixed(2);pl.value=(v/ILS_EUR*PLN_EUR).toFixed(2);};
     const fE=v=>{il.value=(v*ILS_EUR).toFixed(2);pl.value=(v*PLN_EUR).toFixed(2);};
@@ -884,25 +886,12 @@ body:not(.global-edit-active) .edit-indicator {
   }
 
   /* ============================================================
-      DRAG & DROP + CHECKBOX LIST ENGINE
+      UNIVERSAL DIRECT EDITABLE CHECKBOX COMPONENT
   ============================================================ */
-  const TICK=`<svg class="tk" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linecap="round"/></svg>`;
-  const uid=p=>`${p}${Date.now()}${Math.floor(Math.random()*999)}`;
-
-  function makeRow(id, text, checked, stObj, onDel, onRename, index, listType, listContext) {
+  const TICK=`<svg class="tk" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  function makeRow(id, text, checked, stObj, onDel, onRename, onMoveUp, onMoveDown, isFirst, isLast) {
     const row = document.createElement('div');
-    row.className = 'flex items-start gap-3 py-2.5 border-b border-gray-200/60 group relative touch-none';
-    
-    if (globalEditMode) {
-      row.setAttribute('draggable', 'true');
-      row.classList.add('cursor-grab', 'active:cursor-grabbing', 'hover:bg-amber-50/40');
-      
-      row.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', JSON.stringify({ id, index, listType, listContext }));
-        row.style.opacity = '0.4';
-      });
-      row.addEventListener('dragend', () => row.style.opacity = '1');
-    }
+    row.className = 'flex items-start gap-3 py-2.5 border-b border-gray-200/60 group relative';
 
     const box = document.createElement('button');
     box.className = 'chk' + (checked ? ' on' : '');
@@ -923,76 +912,64 @@ body:not(.global-edit-active) .edit-indicator {
     const actions = document.createElement('div');
     actions.className = 'edit-indicator items-center gap-1 absolute left-2 top-2 bg-white/90 pl-1 rounded hidden';
 
+    const upBtn = document.createElement('button');
+    upBtn.className = 'text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 disabled:opacity-20 font-bold text-xs';
+    upBtn.innerHTML = '↑';
+    upBtn.disabled = isFirst;
+    upBtn.onclick = (e) => { e.preventDefault(); onMoveUp(id); };
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 disabled:opacity-20 font-bold text-xs';
+    downBtn.innerHTML = '↓';
+    downBtn.disabled = isLast;
+    downBtn.onclick = (e) => { e.preventDefault(); onMoveDown(id); };
+
     const editBtn = document.createElement('button');
     editBtn.className = 'text-amber-600 hover:text-amber-700 p-1 rounded hover:bg-amber-50';
-    editBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
+    editBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"></path>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+      </svg>
+    `;
     editBtn.addEventListener('click', () => {
       const orig = lbl.textContent;
       lbl.setAttribute('contenteditable', 'true');
       lbl.focus();
-      const range = document.createRange(); range.selectNodeContents(lbl);
-      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      const range = document.createRange();
+      range.selectNodeContents(lbl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
 
-      lbl.addEventListener('blur', () => {
+      const doneEdit = () => {
         lbl.removeAttribute('contenteditable');
         const val = lbl.textContent.trim();
         if (val && val !== orig) onRename(id, val);
         else lbl.textContent = orig;
-      }, { once: true });
+      };
+      lbl.addEventListener('blur', doneEdit, { once: true });
+      lbl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); lbl.blur(); } });
     });
 
     const delBtn = document.createElement('button');
-    delBtn.className = 'text-red-500 hover:text-red-600 p-1 font-bold text-xs px-1.5';
+    delBtn.className = 'text-red-500 hover:text-red-600 p-1 rounded hover:bg-red-50 font-bold text-xs px-1.5';
     delBtn.innerHTML = '✕';
     delBtn.addEventListener('click', () => { showConfirm('מחיקת פריט', `האם למחוק את "${text}"?`, () => onDel(id)); });
 
+    actions.appendChild(upBtn);
+    actions.appendChild(downBtn);
     actions.appendChild(editBtn);
     actions.appendChild(delBtn);
     row.appendChild(actions);
     return row;
   }
 
-  function handleListDrop(e, targetContainer, listType, listContext) {
-    e.preventDefault();
-    try {
-      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-      if (data.listType !== listType || data.listContext !== listContext) return;
-      
-      let arr;
-      if (listType === 'itinerary') {
-        const day = db.days.find(d => `d${d.n}` === listContext);
-        arr = day.checks;
-      } else if (listType === 'preflight') {
-        arr = db.preflight;
-      } else if (listType === 'packing') {
-        arr = db.packing[listContext];
-      }
-      
-      const dragItem = arr.splice(data.index, 1)[0];
-      
-      const rows = [...targetContainer.querySelectorAll('[draggable]')];
-      const nextRow = rows.find(row => {
-        const box = row.getBoundingClientRect();
-        return e.clientY < box.top + box.height / 2;
-      });
-      
-      const nextIndex = nextRow ? rows.indexOf(nextRow) : arr.length;
-      arr.splice(nextIndex, 0, dragItem);
-      saveStateToFirebase();
-    } catch(err) {}
-  }
-
-  function renderList({ cont, items, onRename, onDel, stObj, addId, btnId, onAdd, listType, listContext }) {
+  function renderList({ cont, items, onRename, onDel, onMoveUp, onMoveDown, stObj, addId, btnId, onAdd }) {
     if(!cont) return;
     cont.innerHTML = '';
-    
-    if (globalEditMode) {
-      cont.addEventListener('dragover', (e) => e.preventDefault());
-      cont.addEventListener('drop', (e) => handleListDrop(e, cont, listType, listContext));
-    }
-
     items.forEach((item, i) => {
-      const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, onDel, onRename, i, listType, listContext);
+      const row = makeRow(item.id, item.t, !!stObj[item.id], stObj, onDel, onRename, onMoveUp, onMoveDown, i === 0, i === items.length - 1);
       if (i === items.length - 1) row.style.borderBottom = 'none';
       cont.appendChild(row);
     });
@@ -1183,17 +1160,31 @@ body:not(.global-edit-active) .edit-indicator {
       const bEl = document.getElementById(`it-bed-${idx}`); if(bEl) { bEl.textContent = day.bed || ''; setEditable(bEl, `days.${idx}.bed`); }
       const nEl = document.getElementById(`it-notes-${idx}`); if(nEl) { nEl.textContent = day.notes || ''; setEditable(nEl, `days.${idx}.notes`); }
 
+      const moveUp = (itemId) => {
+        const index = day.checks.findIndex(c => c.id === itemId);
+        if (index > 0) {
+          const temp = day.checks[index]; day.checks[index] = day.checks[index - 1]; day.checks[index - 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+      const moveDown = (itemId) => {
+        const index = day.checks.findIndex(c => c.id === itemId);
+        if (index < day.checks.length - 1) {
+          const temp = day.checks[index]; day.checks[index] = day.checks[index + 1]; day.checks[index + 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+
       renderList({
         cont: document.getElementById(`cl-${dk}`),
         items: day.checks || [],
         onRename: (itemId, txt) => { const target = day.checks.find(c => c.id === itemId); if (target) target.t = txt; saveStateToFirebase(); },
         onDel: (itemId) => { day.checks = day.checks.filter(c => c.id !== itemId); delete logSt[itemId]; saveStateToFirebase(); },
+        onMoveUp: moveUp, onMoveDown: moveDown,
         stObj: logSt,
         addId: `ai-${dk}`,
         btnId: `ab-${dk}`,
-        onAdd: (txt) => { if(!day.checks) day.checks = []; day.checks.push({ id: uid(dk), t: txt }); saveStateToFirebase(); },
-        listType: 'itinerary',
-        listContext: dk
+        onAdd: (txt) => { if(!day.checks) day.checks = []; day.checks.push({ id: uid(dk), t: txt }); saveStateToFirebase(); }
       });
     });
   }
@@ -1231,17 +1222,31 @@ body:not(.global-edit-active) .edit-indicator {
       PRE-FLIGHT MODULE
   ============================================================ */
   function renderPF(){
+    const moveUp = (itemId) => {
+      const index = db.preflight.findIndex(i => i.id === itemId);
+      if (index > 0) {
+        const temp = db.preflight[index]; db.preflight[index] = db.preflight[index - 1]; db.preflight[index - 1] = temp;
+        saveStateToFirebase();
+      }
+    };
+    const moveDown = (itemId) => {
+      const index = db.preflight.findIndex(i => i.id === itemId);
+      if (index < db.preflight.length - 1) {
+        const temp = db.preflight[index]; db.preflight[index] = db.preflight[index + 1]; db.preflight[index + 1] = temp;
+        saveStateToFirebase();
+      }
+    };
+
     renderList({
       cont:document.getElementById('pf-list'),
       items: db.preflight || [],
       onRename: (id, text) => { const target = db.preflight.find(i=>i.id===id); if(target) target.t = text; saveStateToFirebase(); },
       onDel: (id) => { db.preflight = db.preflight.filter(i=>i.id!==id); delete pfSt[id]; saveStateToFirebase(); },
+      onMoveUp: moveUp, onMoveDown: moveDown,
       stObj: pfSt,
       addId: 'pf-inp',
       btnId: 'pf-add-btn',
-      onAdd: (val) => { db.preflight.push({ id: uid('pf'), t: val }); saveStateToFirebase(); },
-      listType: 'preflight',
-      listContext: 'global'
+      onAdd: (val) => { db.preflight.push({ id: uid('pf'), t: val }); saveStateToFirebase(); }
     });
   }
 
@@ -1298,17 +1303,31 @@ body:not(.global-edit-active) .edit-indicator {
         <div class="add-row"><input type="text" id="${sc}-i" placeholder="הוספת פריט…"><button id="${sc}-btn">הוסף</button></div>`;
       wrap.appendChild(card);
 
+      const moveUp = (itemId) => {
+        const index = db.packing[cat].findIndex(i => i.id === itemId);
+        if (index > 0) {
+          const temp = db.packing[cat][index]; db.packing[cat][index] = db.packing[cat][index - 1]; db.packing[cat][index - 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+      const moveDown = (itemId) => {
+        const index = db.packing[cat].findIndex(i => i.id === itemId);
+        if (index < db.packing[cat].length - 1) {
+          const temp = db.packing[cat][index]; db.packing[cat][index] = db.packing[cat][index + 1]; db.packing[cat][index + 1] = temp;
+          saveStateToFirebase();
+        }
+      };
+
       renderList({
         cont:document.getElementById(`${sc}-b`),
         items: items,
         onRename: (id, text) => { const target = items.find(i=>i.id===id); if(target) target.t = text; saveStateToFirebase(); },
         onDel: (id) => { db.packing[cat] = items.filter(i=>i.id!==id); delete packSt[id]; saveStateToFirebase(); },
+        onMoveUp: moveUp, onMoveDown: moveDown,
         stObj: packSt,
         addId:`${sc}-i`,
         btnId:`${sc}-btn`,
-        onAdd:(t)=>{ db.packing[cat].push({id: uid('pk'), t}); saveStateToFirebase(); },
-        listType: 'packing',
-        listContext: cat
+        onAdd:(t)=>{ db.packing[cat].push({id: uid('pk'), t}); saveStateToFirebase(); }
       });
     });
   }
