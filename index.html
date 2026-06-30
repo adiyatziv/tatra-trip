@@ -1508,25 +1508,27 @@ function stopConfetti(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 </script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 <script>
-  // הנתונים שקיבלת מפיירבייס (תחליפי רק את מה שבגרשיים בנתונים שלך)
+  // תבנית גנרית - החליפי את הערכים שבתוך המרכאות בפרטים האמיתיים שלך מהקונסול של פיירבייס
   const firebaseConfig = {
     apiKey: "AIzaSyAqYU2v2IPY0k71BrDsy9UsOvjsPT3j-lk",
-    authDomain: "mylist-8c827.firebaseapp.com",
-    databaseURL: "https://mylist-8c827-default-rtdb.firebaseio.com",
-    projectId: "mylist-8c827",
-    storageBucket: "mylist-8c827.firebasestorage.app",
-    messagingSenderId: "407915743520",
-    appId: "1:407915743520:web:e86e88b5c51d362282ef45"
+  authDomain: "mylist-8c827.firebaseapp.com",
+  databaseURL: "https://mylist-8c827-default-rtdb.firebaseio.com",
+  projectId: "mylist-8c827",
+  storageBucket: "mylist-8c827.firebasestorage.app",
+  messagingSenderId: "407915743520",
+  appId: "1:407915743520:web:e86e88b5c51d362282ef45"
   };
-  // הפעלת החיבור
+
+  // הפעלת החיבור מול פיירבייס
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
   
-  // יצירת חיבור ישיר לרשימה
-  const shoppingListRef = database.ref('shopping-list');
+  // יצירת קישור ישיר לטבלה/נתיב הדאטה של האפליקציה
+  const appStateRef = database.ref('tatra_trip_state');
 </script>
 </body>
 </html>
