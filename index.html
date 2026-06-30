@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+    <link rel="apple-touch-icon" href="icon.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>טיול טאטרה</title>
@@ -1528,6 +1529,50 @@ function stopConfetti(){
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
 }
+</script>
+  
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+
+
+<script>
+
+  // הנתונים שקיבלת מפיירבייס (תחליפי רק את מה שבגרשיים בנתונים שלך)
+
+  const firebaseConfig = {
+
+    apiKey: "AIzaSyAqYU2v2IPY0k71BrDsy9UsOvjsPT3j-lk",
+
+    authDomain: "mylist-8c827.firebaseapp.com",
+
+    databaseURL: "https://mylist-8c827-default-rtdb.firebaseio.com",
+
+    projectId: "mylist-8c827",
+
+    storageBucket: "mylist-8c827.firebasestorage.app",
+
+    messagingSenderId: "407915743520",
+
+    appId: "1:407915743520:web:e86e88b5c51d362282ef45"
+
+  };
+
+
+
+  // הפעלת החיבור
+
+  firebase.initializeApp(firebaseConfig);
+
+  const database = firebase.database();
+
+  
+
+  // יצירת חיבור ישיר לרשימה
+
+  const shoppingListRef = database.ref('shopping-list');
+
 </script>
 </body>
 </html>
