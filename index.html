@@ -5,28 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>טיול טאטרה</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyPlaceholderKeyReplaceMe",
-    authDomain: "tatra-trip.firebaseapp.com",
-    databaseURL: "https://tatra-trip-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "tatra-trip",
-    storageBucket: "tatra-trip.appspot.com",
-    messagingSenderId: "000000000000",
-    appId: "1:000000000000:web:0000000000000000"
-  };
-  // אם Firebase מוגדר — מאתחלים. אחרת המצב נשמר ב-localStorage בלבד.
-  let firebaseApp = null, dbRef = null;
-  try {
-    firebaseApp = firebase.initializeApp(firebaseConfig);
-    dbRef = firebase.database().ref('tatra_state_v1');
-    console.log('Firebase connected');
-  } catch(e) {
-    console.log('Firebase not configured — localStorage only');
-  }
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
